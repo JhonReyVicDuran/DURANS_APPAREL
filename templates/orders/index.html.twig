@@ -1,0 +1,116 @@
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Orders | DURAN'S Apparel Admin{% endblock %}
+
+{% block body %}
+
+<div class="admin-layout">
+
+    {% include 'partials/sidebar.html.twig' %}
+
+    <main class="main-content orders-page">
+
+        <div class="section-heading">
+            <h2>ORDERS</h2>
+            <p>Monitor and update customer orders</p>
+        </div>
+
+        <div class="orders-panel">
+
+            <div class="orders-table-wrapper">
+
+                <table class="orders-table">
+
+                    <colgroup>
+                        <col class="col-order">
+                        <col class="col-customer">
+                        <col class="col-contact">
+                        <col class="col-address">
+                        <col class="col-total">
+                        <col class="col-status">
+                        <col class="col-date">
+                    </colgroup>
+
+                    <thead>
+                        <tr>
+                            <th>ORDER</th>
+                            <th>CUSTOMER</th>
+                            <th>CONTACT</th>
+                            <th>ADDRESS</th>
+                            <th>TOTAL</th>
+                            <th>STATUS</th>
+                            <th>DATE</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for order in orders %}
+
+                            <tr>
+                                <td class="order-number">
+                                    #{{ order.order_id }}
+                                </td>
+
+                                <td class="customer-info">
+                                    <strong>{{ order.customer_name }}</strong>
+                                    <small>{{ order.email }}</small>
+                                </td>
+
+                                <td class="order-contact">
+                                    {{ order.phone }}
+                                </td>
+
+                                <td class="order-address">
+                                    {{ order.address }}
+                                </td>
+
+                                <td class="order-total">
+                                    ₱{{ order.total_amount|number_format(2, '.', ',') }}
+                                </td>
+
+                                <td>
+                                    <select
+                                        class="status-select status-{{ order.status|lower }}"
+                                        onchange="this.className='status-select status-' + this.value.toLowerCase()"
+                                    >
+                                        {% for status in ['Pending', 'Processing', 'Shipped', 'Completed', 'Cancelled'] %}
+                                            <option
+                                                value="{{ status }}"
+                                                {% if order.status == status %}selected{% endif %}
+                                            >
+                                                {{ status }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+
+                                <td class="order-date">
+                                    {{ order.order_date }}
+                                </td>
+                            </tr>
+
+                        {% else %}
+
+                            <tr>
+                                <td colspan="7" class="no-orders">
+                                    No orders available.
+                                </td>
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </main>
+
+</div>
+
+{% endblock %}

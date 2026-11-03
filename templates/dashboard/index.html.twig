@@ -1,0 +1,80 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Admin Dashboard - DURAN'S Apparel{% endblock %}
+
+{% block body %}
+
+<div class="admin-layout">
+
+    {% include 'partials/sidebar.html.twig' %}
+
+    <main class="main-content">
+
+        <section class="stats-container">
+
+            <!-- TOTAL PRODUCTS -->
+            <div class="stat-card">
+
+                <div class="stat-icon">
+                    P
+                </div>
+
+                <div class="stat-info">
+                    <span>TOTAL PRODUCTS</span>
+                    <strong>{{ total_products }}</strong>
+                </div>
+
+            </div>
+
+
+            <!-- LOW STOCK -->
+            <div class="stat-card">
+
+                <div class="stat-icon">
+                    !
+                </div>
+
+                <div class="stat-info">
+                    <span>LOW STOCK</span>
+                    <strong>{{ low_stock }}</strong>
+                </div>
+
+            </div>
+
+
+            <!-- TOTAL ORDERS -->
+            <div class="stat-card">
+
+                <div class="stat-icon">
+                    O
+                </div>
+
+                <div class="stat-info">
+                    <span>TOTAL ORDERS</span>
+                    <strong>{{ total_orders }}</strong>
+                </div>
+
+            </div>
+
+
+            <!-- COMPLETED SALES -->
+            <div class="stat-card">
+
+                <div class="stat-icon">
+                    $
+                </div>
+
+                <div class="stat-info">
+                    <span>COMPLETED SALES</span>
+                    <strong>₱{{ total_sales|number_format(2) }}</strong>
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+{% endblock %}
