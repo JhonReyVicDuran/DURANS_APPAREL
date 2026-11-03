@@ -1,0 +1,52 @@
+<header class="navbar">
+
+    <div class="logo">
+        <a href="{{ path('app_home') }}">
+            <img src="{{ asset('images/logo.png') }}"
+                 alt="DURAN'S Logo">
+        </a>
+    </div>
+
+    <nav class="menu">
+
+        <a href="{{ path('app_home') }}" class="active">
+            HOME
+        </a>
+
+        <a href="/about">ABOUT US</a>
+
+        <a href="/collection">COLLECTIONS</a>
+
+        <a href="/contact">CONTACT US</a>
+
+    </nav>
+
+    <div class="account">
+
+        {% if app.session.get('user_id') %}
+
+            <span class="user-name">
+                Hello, {{ app.session.get('full_name')|e }}
+            </span>
+
+            <a href="{{ path('app_logout') }}"
+               class="login"
+               onclick="openLogoutPopup(event);">
+                Log Out
+            </a>
+
+        {% else %}
+
+            <a href="/login" class="login">Log in</a>
+
+            <a href="/signup" class="signup">Sign up</a>
+
+        {% endif %}
+
+        <a href="/cart" class="cart">
+            🛒
+        </a>
+
+    </div>
+
+</header>
