@@ -1,0 +1,251 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Your Cart | DURAN'S Apparel{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/cart.css') }}">
+{% endblock %}
+
+{% block body %}
+
+<main class="cart-page">
+
+    <div class="cart-wrapper">
+
+        <!-- PAGE TITLE -->
+        <div class="cart-heading">
+            <h1>Your <span>Cart</span></h1>
+            <p>Review your selected products before checkout.</p>
+        </div>
+
+        {% if cartItems is not empty %}
+
+            <div class="cart-content">
+
+                <!-- CART ITEMS -->
+                <section class="cart-items-section">
+
+                    <div class="cart-section-header">
+                        <h2>Shopping Cart ({{ itemCount }} items)</h2>
+
+                        <button
+                            type="button"
+                            class="clear-cart-btn"
+                            data-cart-clear
+                        >
+                            Clear Cart
+                        </button>
+                    </div>
+
+                    <div class="cart-items-list">
+
+                        {% for item in cartItems %}
+
+                            <article class="cart-item">
+
+                                <!-- PRODUCT IMAGE -->
+                                <div class="cart-item-image">
+
+                                    {% if item.image %}
+                                        <img
+                                            src="{{ asset(item.image) }}"
+                                            alt="{{ item.name }}"
+                                        >
+                                    {% else %}
+                                        <div class="cart-image-placeholder">
+                                            <span>DURAN'S</span>
+                                            <small>APPAREL</small>
+                                        </div>
+                                    {% endif %}
+
+                                </div>
+
+                                <!-- PRODUCT DETAILS -->
+                                <div class="cart-item-info">
+
+                                    <h3>{{ item.name }}</h3>
+
+                                    <p class="cart-item-category">
+                                        {{ item.category }}
+                                    </p>
+
+                                    <p class="cart-item-size">
+                                        Size: <strong>{{ item.size }}</strong>
+                                    </p>
+
+                                    <p class="cart-item-stock">
+                                        {{ item.stock }} available
+                                    </p>
+
+                                    <p class="cart-item-price">
+                                        ₱{{ item.price|number_format(2, '.', ',') }}
+                                    </p>
+
+                                </div>
+
+                                <!-- QUANTITY -->
+                                <div class="cart-item-quantity">
+
+                                    <label>QUANTITY</label>
+
+                                    <div class="cart-quantity-controls">
+
+                                        <button
+                                            type="button"
+                                            data-quantity-change="-1"
+                                            data-item-key="{{ item.item_key }}"
+                                            aria-label="Decrease quantity"
+                                            {% if item.quantity <= 1 %}disabled{% endif %}
+                                        >
+                                            −
+                                        </button>
+
+                                        <input
+                                            type="number"
+                                            value="{{ item.quantity }}"
+                                            min="1"
+                                            max="{{ item.stock }}"
+                                            readonly
+                                            aria-label="Product quantity"
+                                        >
+
+                                        <button
+                                            type="button"
+                                            data-quantity-change="1"
+                                            data-item-key="{{ item.item_key }}"
+                                            aria-label="Increase quantity"
+                                            {% if item.quantity >= item.stock %}disabled{% endif %}
+                                        >
+                                            +
+                                        </button>
+
+                                    </div>
+
+                                </div>
+
+                                <!-- ITEM TOTAL -->
+                                <div class="cart-item-total">
+
+                                    <label>ITEM TOTAL</label>
+
+                                    <strong>
+                                        ₱{{ item.item_total|number_format(2, '.', ',') }}
+                                    </strong>
+
+                                </div>
+
+                                <!-- REMOVE BUTTON -->
+                                <button
+                                    type="button"
+                                    class="remove-item-btn"
+                                    data-remove-item
+                                    data-item-key="{{ item.item_key }}"
+                                    aria-label="Remove {{ item.name }}"
+                                    title="Remove item"
+                                >
+                                    &times;
+                                </button>
+
+                            </article>
+
+                        {% endfor %}
+
+                    </div>
+
+                    <a href="{{ path('collections') }}" class="continue-shopping">
+                        ← Continue Shopping
+                    </a>
+
+                </section>
+
+
+                <!-- ORDER SUMMARY -->
+                <aside class="order-summary">
+
+                    <h2>Order Summary</h2>
+
+                    <div class="summary-row">
+                        <span>Items</span>
+                        <strong>{{ itemCount }}</strong>
+                    </div>
+
+                    <div class="summary-row">
+                        <span>Subtotal</span>
+                        <strong>
+                            ₱{{ subtotal|number_format(2, '.', ',') }}
+                        </strong>
+                    </div>
+
+                    <div class="summary-row">
+                        <span>Shipping</span>
+                        <strong class="free-shipping">FREE</strong>
+                    </div>
+
+                    <div class="summary-divider"></div>
+
+                    <div class="summary-total">
+                        <span>Total</span>
+                        <strong>
+                            ₱{{ total|number_format(2, '.', ',') }}
+                        </strong>
+                    </div>
+
+                    <button
+                        type="button"
+                        class="checkout-btn"
+                        data-checkout
+                    >
+                        PROCEED TO CHECKOUT
+                    </button>
+
+                    <p class="checkout-note">
+                        Checkout will be available once the account
+                        and order system is connected.
+                    </p>
+
+                </aside>
+
+            </div>
+
+        {% else %}
+
+            <!-- EMPTY CART -->
+            <section class="empty-cart">
+
+                <div class="empty-cart-icon">🛒</div>
+
+                <h2>Your Cart is Empty</h2>
+
+                <p>
+                    You haven't added any products to your cart yet.
+                    Explore our collections and find something you like.
+                </p>
+
+                <a href="{{ path('collections') }}" class="shop-now-btn">
+                    SHOP NOW
+                </a>
+
+            </section>
+
+        {% endif %}
+
+    </div>
+
+</main>
+
+<!-- CART NOTIFICATION -->
+<div
+    class="cart-notification"
+    id="cartNotification"
+    role="status"
+    aria-live="polite"
+></div>
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+    <script src="{{ asset('js/cart.js') }}" defer></script>
+{% endblock %}

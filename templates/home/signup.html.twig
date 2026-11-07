@@ -1,0 +1,232 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Sign Up | DURAN'S Apparel{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/signup.css') }}">
+{% endblock %}
+
+{% block body %}
+
+<main class="signup-page">
+
+    <div class="signup-container">
+
+        <!-- HEADER -->
+        <div class="signup-header">
+
+            <h1>
+                Create <span>Account</span>
+            </h1>
+
+            <p>
+                Join DURAN'S Apparel and discover your style.
+            </p>
+
+        </div>
+
+        <!-- SUCCESS MESSAGE -->
+        {% if success %}
+            <div class="success-message">
+                Account form validated successfully!
+
+                <small>
+                    This is a frontend demonstration.
+                    Your account has not been saved yet.
+                </small>
+            </div>
+        {% endif %}
+
+        <!-- ERROR MESSAGE -->
+        {% if error %}
+            <div class="error-message">
+                {{ error }}
+            </div>
+        {% endif %}
+
+        <!-- SIGNUP FORM -->
+        <form
+            class="signup-form"
+            id="signupForm"
+            action="{{ path('signup') }}"
+            method="POST"
+        >
+
+            <!-- FULL NAME -->
+            <div class="form-group">
+
+                <label for="fullname">
+                    Full Name
+                </label>
+
+                <input
+                    type="text"
+                    id="fullname"
+                    name="fullname"
+                    placeholder="Enter your full name"
+                    value="{{ fullname }}"
+                    required
+                >
+
+            </div>
+
+            <!-- EMAIL -->
+            <div class="form-group">
+
+                <label for="email">
+                    Email Address
+                </label>
+
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="Enter your email"
+                    value="{{ email }}"
+                    required
+                >
+
+            </div>
+
+            <!-- PASSWORD -->
+            <div class="form-group">
+
+                <label for="password">
+                    Password
+                </label>
+
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="Create a password"
+                    minlength="6"
+                    required
+                >
+
+                <div
+                    class="password-message"
+                    id="passwordMessage"
+                >
+                    Password must be at least 6 characters.
+                </div>
+
+            </div>
+
+            <!-- CONFIRM PASSWORD -->
+            <div class="form-group">
+
+                <label for="confirmPassword">
+                    Confirm Password
+                </label>
+
+                <input
+                    type="password"
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    placeholder="Confirm your password"
+                    required
+                >
+
+                <div
+                    class="password-message"
+                    id="confirmMessage"
+                >
+                    Passwords do not match.
+                </div>
+
+            </div>
+
+            <!-- TERMS AND CONDITIONS -->
+            <div class="terms">
+
+                <input
+                    type="checkbox"
+                    id="terms"
+                    name="terms"
+                    required
+                >
+
+                <label for="terms">
+                    I agree to the
+
+                    <a href="#">
+                        Terms & Conditions
+                    </a>
+
+                    and
+
+                    <a href="#">
+                        Privacy Policy
+                    </a>.
+                </label>
+
+            </div>
+
+            <!-- SIGNUP BUTTON -->
+            <button
+                type="submit"
+                class="signup-button"
+            >
+                CREATE ACCOUNT
+            </button>
+
+        </form>
+
+        <!-- LOGIN LINK -->
+        <div class="login-link">
+
+            Already have an account?
+
+            <a href="/login">
+                Log in
+            </a>
+
+        </div>
+
+    </div>
+
+</main>
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+    <script>
+        const signupForm = document.getElementById("signupForm");
+
+        const password = document.getElementById("password");
+        const confirmPassword = document.getElementById("confirmPassword");
+
+        const passwordMessage = document.getElementById("passwordMessage");
+        const confirmMessage = document.getElementById("confirmMessage");
+
+        signupForm.addEventListener("submit", function(event) {
+
+            let valid = true;
+
+            // CHECK PASSWORD LENGTH
+            if (password.value.length < 6) {
+                passwordMessage.style.display = "block";
+                valid = false;
+            } else {
+                passwordMessage.style.display = "none";
+            }
+
+            // CHECK PASSWORD MATCH
+            if (password.value !== confirmPassword.value) {
+                confirmMessage.style.display = "block";
+                valid = false;
+            } else {
+                confirmMessage.style.display = "none";
+            }
+
+            if (!valid) {
+                event.preventDefault();
+            }
+
+        });
+    </script>
+{% endblock %}

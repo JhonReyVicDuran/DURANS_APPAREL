@@ -1,0 +1,124 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Contact Us | DURAN'S Apparel{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/contact.css') }}">
+{% endblock %}
+
+{% block body %}
+
+<section class="contact-page">
+
+    <!-- HERO -->
+    <div class="contact-hero">
+        <h1>CONTACT <span>US</span></h1>
+
+        <p>
+            We'd love to hear from you.
+            Send us a message anytime.
+        </p>
+    </div>
+
+    <!-- CONTACT SECTION -->
+    <div class="contact-container">
+
+        <!-- CONTACT INFORMATION -->
+        <div class="contact-info">
+
+            <h2>Get In Touch</h2>
+
+            <div class="info-box">
+                <h3>📍 Address</h3>
+                <p>
+                    Dumaguete City, Negros Oriental,
+                    Philippines
+                </p>
+            </div>
+
+            <div class="info-box">
+                <h3>📞 Phone</h3>
+                <p>+63 912 345 6789</p>
+            </div>
+
+            <div class="info-box">
+                <h3>✉ Email</h3>
+                <p>duransapparel@gmail.com</p>
+            </div>
+
+            <div class="info-box">
+                <h3>🕒 Business Hours</h3>
+                <p>
+                    Monday - Saturday<br>
+                    8:00 AM - 6:00 PM
+                </p>
+            </div>
+
+        </div>
+
+        <!-- CONTACT FORM -->
+        <div class="contact-form">
+
+            <h2>Send a Message</h2>
+
+            {% if success %}
+                <div class="success-message">
+                    Your message has been sent successfully!
+                    <small>This is a frontend demonstration. Your message has not been saved.</small>
+                </div>
+            {% endif %}
+
+            {% if error %}
+                <div class="error-message">
+                    {{ error }}
+                </div>
+            {% endif %}
+
+            <form method="POST" action="{{ path('contact') }}">
+
+                <input
+                    type="text"
+                    placeholder="Full Name"
+                    value=""
+                    readonly
+                >
+
+                <input
+                    type="email"
+                    placeholder="Email Address"
+                    value=""
+                    readonly
+                >
+
+                <input
+                    type="text"
+                    name="subject"
+                    placeholder="Subject"
+                    required
+                >
+
+                <textarea
+                    name="message"
+                    placeholder="Your Message"
+                    required
+                ></textarea>
+
+                <button type="submit">
+                    SEND MESSAGE
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    <!-- SOCIAL SECTION -->
+    <div class="social-section">
+        <h2>We Appreciate Your Response</h2>
+    </div>
+
+</section>
+
+{% endblock %}

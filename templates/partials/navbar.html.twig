@@ -9,15 +9,39 @@
 
     <nav class="menu">
 
-        <a href="{{ path('app_home') }}" class="active">
-            HOME
-        </a>
+        
+<nav class="menu">
 
-        <a href="/about">ABOUT US</a>
+    
+<nav class="menu">
 
-        <a href="/collection">COLLECTIONS</a>
+    <a href="/home"
+       class="{{ app.request.pathInfo == '/home' ? 'active' : '' }}">
+        HOME
+    </a>
 
-        <a href="/contact">CONTACT US</a>
+    <a href="{{ path('about') }}"
+       class="{{ app.request.pathInfo == '/about' ? 'active' : '' }}">
+        ABOUT US
+    </a>
+
+    
+    <a href="{{ path('collections') }}"
+        class="{{ app.request.pathInfo == '/collections' ? 'active' : '' }}">
+        COLLECTIONS
+    </a>
+
+
+    <a href="{{ path('contact') }}"
+        class="{{ app.request.attributes.get('_route') == 'contact' ? 'active' : '' }}">
+        CONTACT US
+    </a>
+
+</nav>
+
+
+</nav>
+
 
     </nav>
 
@@ -39,11 +63,13 @@
 
             <a href="/login" class="login">Log in</a>
 
-            <a href="/signup" class="signup">Sign up</a>
+            <a href="{{ path('signup') }}" class="signup-nav-btn">
+                Sign Up
+            </a>
 
         {% endif %}
 
-        <a href="/cart" class="cart">
+        <a href="{{ path('cart') }}">
             🛒
         </a>
 

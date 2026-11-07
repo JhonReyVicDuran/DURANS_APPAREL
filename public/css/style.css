@@ -1348,3 +1348,31 @@ footer {
 
     gap: 20px;
 }
+
+a.signup-nav-btn {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+
+    width: 66px !important;
+    height: 30px !important;
+    padding: 0 !important;
+
+    box-sizing: border-box;
+    border: 1px solid #000 !important;
+    border-radius: 25px !important;
+
+    color: #000 !important;
+    background: transparent !important;
+    text-decoration: none !important;
+
+    font-size: 11px !important;
+    font-weight: 700;
+    line-height: 1;
+    transition: 0.3s ease;
+}
+
+a.signup-nav-btn:hover {
+    background: #000 !important;
+    color: #fff !important;
+}
