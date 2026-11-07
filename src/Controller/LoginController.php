@@ -22,7 +22,21 @@ class LoginController extends AbstractController
             if ($email === '' || $password === '') {
                 $error = 'Please enter your email/username and password.';
             } else {
-                $error = 'Login is not available yet. Please try again once the account system is connected.';
+
+                // TEMPORARY LOGIN SESSION
+                $session = $request->getSession();
+
+                $temporaryUserId = 'TEMP-' . substr(
+                    hash('sha256', strtolower($email)),
+                    0,
+                    12
+                );
+
+                $session->set('user_id', $temporaryUserId);
+                $session->set('user_email', $email);
+
+                // Redirect after successful temporary login
+                return $this->redirectToRoute('collections');
             }
         }
 

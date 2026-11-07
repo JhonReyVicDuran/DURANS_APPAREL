@@ -11,7 +11,7 @@ use Symfony\Component\Routing\Attribute\Route;
 class CartController extends AbstractController
 {
     // Temporary product catalog.
-    // Keep these details consistent with CollectionController.
+    // These details should match CollectionController.
     private function getProducts(): array
     {
         return [
@@ -72,9 +72,20 @@ class CartController extends AbstractController
         ];
     }
 
+    // Check whether the customer has a login session.
+    private function isLoggedIn(Request $request): bool
+    {
+        return $request->getSession()->has('user_id');
+    }
+
+    // Display the shopping cart.
     #[Route('/cart', name: 'cart', methods: ['GET'])]
     public function index(Request $request): Response
     {
+        if (!$this->isLoggedIn($request)) {
+            return $this->redirectToRoute('login');
+        }
+
         $cart = $request->getSession()->get('cart', []);
 
         $subtotal = 0;
@@ -86,6 +97,7 @@ class CartController extends AbstractController
             $subtotal += $item['item_total'];
             $itemCount += $item['quantity'];
         }
+
         unset($item);
 
         return $this->render('home/cart.html.twig', [
@@ -96,9 +108,19 @@ class CartController extends AbstractController
         ]);
     }
 
+    // Add a product to the cart.
     #[Route('/cart/add/{id}', name: 'cart_add', methods: ['POST'])]
     public function add(Request $request, int $id): JsonResponse
     {
+        // Require login first.
+        if (!$this->isLoggedIn($request)) {
+            return $this->json([
+                'success' => false,
+                'login_required' => true,
+                'message' => 'Please log in first.',
+            ], 401);
+        }
+
         $products = $this->getProducts();
 
         if (!isset($products[$id])) {
@@ -111,6 +133,7 @@ class CartController extends AbstractController
         $data = $request->toArray();
 
         $size = trim((string) ($data['size'] ?? ''));
+
         $quantity = filter_var(
             $data['quantity'] ?? 1,
             FILTER_VALIDATE_INT
@@ -149,7 +172,7 @@ class CartController extends AbstractController
         $session = $request->getSession();
         $cart = $session->get('cart', []);
 
-        // Same product with different sizes gets a separate cart entry.
+        // Different sizes create separate cart entries.
         $itemKey = $id . '_' . $size;
 
         $existingQuantity = $cart[$itemKey]['quantity'] ?? 0;
@@ -187,12 +210,22 @@ class CartController extends AbstractController
         ]);
     }
 
+    // Update the quantity of a cart item.
     #[Route('/cart/update', name: 'cart_update', methods: ['POST'])]
     public function update(Request $request): JsonResponse
     {
+        if (!$this->isLoggedIn($request)) {
+            return $this->json([
+                'success' => false,
+                'login_required' => true,
+                'message' => 'Please log in first.',
+            ], 401);
+        }
+
         $data = $request->toArray();
 
         $itemKey = (string) ($data['itemKey'] ?? '');
+
         $quantity = filter_var(
             $data['quantity'] ?? null,
             FILTER_VALIDATE_INT
@@ -215,9 +248,7 @@ class CartController extends AbstractController
             ], 400);
         }
 
-        $item = $cart[$itemKey];
-
-        if ($quantity > $item['stock']) {
+        if ($quantity > $cart[$itemKey]['stock']) {
             return $this->json([
                 'success' => false,
                 'message' => 'The selected quantity exceeds available stock.',
@@ -234,9 +265,18 @@ class CartController extends AbstractController
         ]);
     }
 
+    // Remove an item from the cart.
     #[Route('/cart/remove', name: 'cart_remove', methods: ['POST'])]
     public function remove(Request $request): JsonResponse
     {
+        if (!$this->isLoggedIn($request)) {
+            return $this->json([
+                'success' => false,
+                'login_required' => true,
+                'message' => 'Please log in first.',
+            ], 401);
+        }
+
         $data = $request->toArray();
         $itemKey = (string) ($data['itemKey'] ?? '');
 
@@ -260,9 +300,18 @@ class CartController extends AbstractController
         ]);
     }
 
+    // Clear all cart items.
     #[Route('/cart/clear', name: 'cart_clear', methods: ['POST'])]
     public function clear(Request $request): JsonResponse
     {
+        if (!$this->isLoggedIn($request)) {
+            return $this->json([
+                'success' => false,
+                'login_required' => true,
+                'message' => 'Please log in first.',
+            ], 401);
+        }
+
         $request->getSession()->set('cart', []);
 
         return $this->json([

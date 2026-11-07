@@ -1,139 +1,149 @@
-/* =====================================================
-   CHANGE PRODUCT QUANTITY
-===================================================== */
+// ==========================================
+// CHANGE PRODUCT QUANTITY
+// ==========================================
 
 function changeQuantity(productId, change) {
     const quantityInput = document.getElementById(
-        "quantity-" + productId
+        `quantity-${productId}`
     );
 
     if (!quantityInput) {
         return;
     }
 
-    let quantity = parseInt(quantityInput.value) || 1;
-    const max = parseInt(quantityInput.max) || 1;
+    const currentQuantity = parseInt(quantityInput.value) || 1;
+    const minimum = parseInt(quantityInput.min) || 1;
+    const maximum = parseInt(quantityInput.max) || 1;
 
-    quantity += change;
+    const newQuantity = currentQuantity + change;
 
-    if (quantity < 1) {
-        quantity = 1;
+    if (newQuantity >= minimum && newQuantity <= maximum) {
+        quantityInput.value = newQuantity;
     }
-
-    if (quantity > max) {
-        quantity = max;
-    }
-
-    quantityInput.value = quantity;
 }
 
 
-/* =====================================================
-   ADD PRODUCT TO CART
-===================================================== */
+// ==========================================
+// ADD PRODUCT TO CART
+// ==========================================
 
 async function addToCart(productId) {
+    const productCard = document.querySelector(
+        `.collection-card[data-product-id="${productId}"]`
+    );
+
+    if (!productCard) {
+        showNotification('Product not found.');
+        return;
+    }
+
     const quantityInput = document.getElementById(
-        "quantity-" + productId
+        `quantity-${productId}`
     );
 
     const sizeInput = document.getElementById(
-        "size-" + productId
+        `size-${productId}`
     );
 
-    const productCard = document.querySelector(
-        '.collection-card[data-product-id="' + productId + '"]'
-    );
-
-    const addButton = productCard?.querySelector(".add-cart");
+    const addButton = productCard.querySelector('.add-cart');
 
     if (!quantityInput || !sizeInput || !addButton) {
+        showNotification('Unable to get product information.');
         return;
     }
 
-    const quantity = parseInt(quantityInput.value) || 1;
+    const quantity = parseInt(quantityInput.value);
     const size = sizeInput.value;
-    const addUrl = addButton.dataset.addUrl;
 
     if (!size) {
-        showNotification("Please select a size.");
+        showNotification('Please select a size first.');
         return;
     }
 
-    if (!addUrl) {
-        showNotification("Unable to add this product right now.");
+    if (!quantity || quantity < 1) {
+        showNotification('Please select a valid quantity.');
         return;
     }
 
-    addButton.disabled = true;
-    addButton.textContent = "ADDING...";
+    const addUrl = addButton.dataset.addUrl;
+
+    const loginUrl = document.querySelector(
+        '.collections-main'
+    )?.dataset.loginUrl;
 
     try {
+        addButton.disabled = true;
+        addButton.textContent = 'ADDING...';
+
         const response = await fetch(addUrl, {
-            method: "POST",
+            method: 'POST',
             headers: {
-                "Content-Type": "application/json",
-                "X-Requested-With": "XMLHttpRequest"
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
             },
             body: JSON.stringify({
-                size: size,
-                quantity: quantity
+                quantity: quantity,
+                size: size
             })
         });
 
         const result = await response.json();
 
+        // Customer is not logged in.
+        if (result.login_required) {
+            showNotification('Please log in before adding products.');
+
+            setTimeout(() => {
+                window.location.href = loginUrl;
+            }, 1000);
+
+            return;
+        }
+
         if (!response.ok || !result.success) {
-            showNotification(
-                result.message || "Unable to add product."
-            );
+            showNotification(result.message || 'Unable to add product.');
             return;
         }
 
         showNotification(result.message);
 
-        // Reset the selected quantity after adding.
-        quantityInput.value = 1;
-
-        // Update the cart badge if it exists.
-        const cartCount = document.getElementById("cartCount");
+        // Update cart badge if one exists in the navbar.
+        const cartCount = document.getElementById('cartCount');
 
         if (cartCount) {
             cartCount.textContent = result.cartCount;
         }
 
+        // Reset quantity after successful addition.
+        quantityInput.value = 1;
+
     } catch (error) {
-        console.error("Add to cart error:", error);
-        showNotification("Something went wrong. Please try again.");
+        console.error('Add to cart error:', error);
+        showNotification('Something went wrong. Please try again.');
 
     } finally {
         addButton.disabled = false;
-        addButton.textContent = "ADD TO CART 🛒";
+        addButton.textContent = 'ADD TO CART 🛒';
     }
 }
 
 
-/* =====================================================
-   CART NOTIFICATION
-===================================================== */
+// ==========================================
+// DISPLAY NOTIFICATION
+// ==========================================
 
 function showNotification(message) {
-    const notification = document.getElementById(
-        "cartNotification"
-    );
+    const notification = document.getElementById('cartNotification');
 
     if (!notification) {
+        alert(message);
         return;
     }
 
     notification.textContent = message;
-    notification.classList.add("show");
+    notification.classList.add('show');
 
-    if (notification.hideTimer) {
-        clearTimeout(notification.hideTimer);
-    }
-
-    notification.hideTimer = setTimeout(function () {
-        notification.classList.remove("show");
+    setTimeout(() => {
+        notification.classList.remove('show');
     }, 3000);
 }

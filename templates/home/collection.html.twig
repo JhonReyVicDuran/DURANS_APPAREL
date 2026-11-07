@@ -9,7 +9,7 @@
 
 {% block body %}
 
-<main class="collections-main" data-cart-url="{{ path('cart') }}">
+<main class="collections-main" data-login-url="{{ path('login') }}">
 
     <!-- COLLECTION HERO -->
     <section class="collection-hero">
@@ -185,7 +185,7 @@
                                     onclick="addToCart({{ product.id }})"
                                 >
                                     ADD TO CART 🛒
-                                </button>
+                                </button>   
 
 
                             {% else %}
