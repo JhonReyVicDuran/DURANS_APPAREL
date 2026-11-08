@@ -25,9 +25,16 @@
 
         {# ORDERS #}
         <a href="{{ path('admin_orders') }}"
-           class="menu-item {% if app.request.attributes.get('_route') == 'admin_orders' or app.request.attributes.get('_route') == 'admin_order_update_status' %}active{% endif %}">
+           class="menu-item {% if app.request.attributes.get('_route') in ['admin_orders', 'admin_order_update_status'] %}active{% endif %}">
             <span class="menu-icon">▤</span>
             <span>Orders</span>
+        </a>
+
+        {# MESSAGES #}
+        <a href="{{ path('admin_messages') }}"
+           class="menu-item {% if app.request.attributes.get('_route') starts with 'admin_message' %}active{% endif %}">
+            <span class="menu-icon">✉</span>
+            <span>Messages</span>
         </a>
 
         {# VIEW WEBSITE #}

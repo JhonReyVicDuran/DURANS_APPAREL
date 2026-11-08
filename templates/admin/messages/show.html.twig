@@ -1,0 +1,73 @@
+{% extends 'admin_base.html.twig' %}
+
+{% block title %}Read Message - DURAN'S Apparel Admin{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/messages.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="admin-layout">
+
+    {% include 'partials/sidebar.html.twig' %}
+
+    <main class="main-content messages-page">
+
+        <div class="messages-header">
+            <div>
+                <h2>Message Details</h2>
+                <p>Read and review the customer's inquiry.</p>
+            </div>
+
+            <a href="{{ path('admin_messages') }}" class="message-back-button">
+                ← BACK TO INBOX
+            </a>
+        </div>
+
+        <section class="message-details-panel">
+
+            <div class="message-details-header">
+                <div>
+                    <span class="message-details-label">MESSAGE SUBJECT</span>
+                    <h3>{{ message.subject }}</h3>
+                </div>
+
+                <span class="message-status {{ message.status|lower }}">
+                    {{ message.status }}
+                </span>
+            </div>
+
+            <div class="message-sender-details">
+
+                <div class="message-sender-avatar">
+                    {{ message.fullName|first|upper }}
+                </div>
+
+                <div class="message-sender-info">
+                    <strong>{{ message.fullName }}</strong>
+                    <a href="mailto:{{ message.email }}">
+                        {{ message.email }}
+                    </a>
+                </div>
+
+                <div class="message-received-date">
+                    {{ message.createdAt|date('F d, Y') }}
+                    <span>{{ message.createdAt|date('h:i A') }}</span>
+                </div>
+
+            </div>
+
+            <div class="message-content-section">
+                <span class="message-details-label">MESSAGE CONTENT</span>
+
+                <div class="message-content">
+                    {{ message.message|nl2br }}
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+</div>
+{% endblock %}

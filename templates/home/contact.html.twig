@@ -62,12 +62,11 @@
 
             <h2>Send a Message</h2>
 
-            {% if success %}
+            {% for message in app.flashes('contact_success') %}
                 <div class="success-message">
-                    Your message has been sent successfully!
-                    <small>This is a frontend demonstration. Your message has not been saved.</small>
+                    {{ message }}
                 </div>
-            {% endif %}
+            {% endfor %}
 
             {% if error %}
                 <div class="error-message">
@@ -78,23 +77,35 @@
             <form method="POST" action="{{ path('contact') }}">
 
                 <input
+                    type="hidden"
+                    name="_token"
+                    value="{{ csrf_token('contact_form') }}"
+                >
+
+                <input
                     type="text"
+                    name="fullName"
                     placeholder="Full Name"
-                    value=""
-                    readonly
+                    value="{{ formValues.fullName }}"
+                    {% if app.user %}readonly{% endif %}
+                    required
                 >
 
                 <input
                     type="email"
+                    name="email"
                     placeholder="Email Address"
-                    value=""
-                    readonly
+                    value="{{ formValues.email }}"
+                    {% if app.user %}readonly{% endif %}
+                    required
                 >
 
                 <input
                     type="text"
                     name="subject"
                     placeholder="Subject"
+                    value="{{ formValues.subject }}"
+                    maxlength="255"
                     required
                 >
 
@@ -102,7 +113,7 @@
                     name="message"
                     placeholder="Your Message"
                     required
-                ></textarea>
+                >{{ formValues.message }}</textarea>
 
                 <button type="submit">
                     SEND MESSAGE

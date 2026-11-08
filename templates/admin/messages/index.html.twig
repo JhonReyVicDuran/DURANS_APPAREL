@@ -1,0 +1,102 @@
+{% extends 'admin_base.html.twig' %}
+
+{% block title %}Messages - DURAN'S Apparel Admin{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/messages.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="admin-layout">
+
+    {% include 'partials/sidebar.html.twig' %}
+
+    <main class="main-content messages-page">
+
+        <div class="messages-header">
+            <div>
+                <h2>Customer Messages</h2>
+                <p>Manage inquiries sent through your Contact Us page.</p>
+            </div>
+
+            <div class="messages-count">
+                <span>UNREAD MESSAGES</span>
+                <strong>{{ unreadCount }}</strong>
+            </div>
+        </div>
+
+        <section class="messages-panel">
+
+            <div class="messages-panel-header">
+                <h3>Inbox</h3>
+                <span>{{ messages|length }} total messages</span>
+            </div>
+
+            <div class="messages-table-wrapper">
+                <table class="messages-table">
+                    <thead>
+                        <tr>
+                            <th>CUSTOMER</th>
+                            <th>SUBJECT</th>
+                            <th>DATE RECEIVED</th>
+                            <th>STATUS</th>
+                            <th>ACTION</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for message in messages %}
+                            <tr>
+                                <td>
+                                    <div class="message-customer">
+                                        <strong>
+                                            <a href="{{ path('admin_message_show', {id: message.id}) }}">
+                                                {{ message.fullName }}
+                                            </a>
+                                        </strong>
+                                        <span>{{ message.email }}</span>
+                                    </div>
+                                </td>
+
+                                <td class="message-subject">
+                                    {{ message.subject }}
+                                </td>
+
+                                <td class="message-date">
+                                    {{ message.createdAt|date('M d, Y - h:i A') }}
+                                </td>
+
+                                <td>
+                                    <span class="message-status {{ message.status|lower }}">
+                                        {{ message.status }}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <a
+                                        href="{{ path('admin_message_show', {id: message.id}) }}"
+                                        class="message-view-button"
+                                    >
+                                        READ MESSAGE →
+                                    </a>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="5" class="messages-empty">
+                                    <span class="empty-icon">✉</span>
+                                    <strong>No messages yet</strong>
+                                    <p>Customer inquiries will appear here when submitted.</p>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        </section>
+
+    </main>
+</div>
+{% endblock %}
