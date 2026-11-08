@@ -1,0 +1,301 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Size Guide | DURAN'S Apparel{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/size-guide.css') }}">
+{% endblock %}
+
+{% block body %}
+
+<main class="size-guide-container">
+
+    <!-- SIZE GUIDE HEADER -->
+    <div class="size-guide-header">
+
+        <h1>Size Guide</h1>
+
+        <p>
+            Find your perfect fit.
+            Use the measurements below to choose the size
+            that works best for you.
+        </p>
+
+    </div>
+
+
+    <!-- T-SHIRTS -->
+    <section class="size-section">
+
+        <h2>T-Shirts</h2>
+
+        <p class="size-section-description">
+            Recommended measurements for our regular-fit T-shirts.
+        </p>
+
+        <div class="size-table-wrapper">
+
+            <table class="size-table">
+
+                <thead>
+                    <tr>
+                        <th>Size</th>
+                        <th>Chest (in)</th>
+                        <th>Length (in)</th>
+                        <th>Shoulder (in)</th>
+                        <th>Suggested Height</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr><td class="size-name">XS</td><td>32–34</td><td>26</td><td>16</td><td>5'0"–5'3"</td></tr>
+                    <tr><td class="size-name">S</td><td>34–36</td><td>27</td><td>17</td><td>5'2"–5'5"</td></tr>
+                    <tr><td class="size-name">M</td><td>36–38</td><td>28</td><td>18</td><td>5'4"–5'8"</td></tr>
+                    <tr><td class="size-name">L</td><td>38–41</td><td>29</td><td>19</td><td>5'7"–5'11"</td></tr>
+                    <tr><td class="size-name">XL</td><td>41–44</td><td>30</td><td>20</td><td>5'10"–6'2"</td></tr>
+                    <tr><td class="size-name">XXL</td><td>44–48</td><td>31</td><td>21</td><td>6'0"+</td></tr>
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+
+    <!-- COMPRESSION SHIRTS -->
+    <section class="size-section">
+
+        <h2>Compression Shirts</h2>
+
+        <p class="size-section-description">
+            Compression fit. For a tighter athletic fit,
+            consider choosing your usual size.
+        </p>
+
+        <div class="size-table-wrapper">
+
+            <table class="size-table">
+
+                <thead>
+                    <tr>
+                        <th>Size</th>
+                        <th>Chest (in)</th>
+                        <th>Waist (in)</th>
+                        <th>Length (in)</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr><td class="size-name">XS</td><td>30–32</td><td>24–26</td><td>25</td></tr>
+                    <tr><td class="size-name">S</td><td>32–34</td><td>26–28</td><td>26</td></tr>
+                    <tr><td class="size-name">M</td><td>34–37</td><td>28–31</td><td>27</td></tr>
+                    <tr><td class="size-name">L</td><td>37–40</td><td>31–34</td><td>28</td></tr>
+                    <tr><td class="size-name">XL</td><td>40–43</td><td>34–37</td><td>29</td></tr>
+                    <tr><td class="size-name">XXL</td><td>43–46</td><td>37–40</td><td>30</td></tr>
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+
+    <!-- HOODIES -->
+    <section class="size-section">
+
+        <h2>Hoodies</h2>
+
+        <p class="size-section-description">
+            Designed for a comfortable and relaxed fit.
+        </p>
+
+        <div class="size-table-wrapper">
+
+            <table class="size-table">
+
+                <thead>
+                    <tr>
+                        <th>Size</th>
+                        <th>Chest (in)</th>
+                        <th>Length (in)</th>
+                        <th>Shoulder (in)</th>
+                        <th>Sleeve (in)</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr><td class="size-name">XS</td><td>36–38</td><td>25</td><td>17</td><td>23</td></tr>
+                    <tr><td class="size-name">S</td><td>38–40</td><td>26</td><td>18</td><td>24</td></tr>
+                    <tr><td class="size-name">M</td><td>40–42</td><td>27</td><td>19</td><td>25</td></tr>
+                    <tr><td class="size-name">L</td><td>42–45</td><td>28</td><td>20</td><td>26</td></tr>
+                    <tr><td class="size-name">XL</td><td>45–48</td><td>29</td><td>21</td><td>27</td></tr>
+                    <tr><td class="size-name">XXL</td><td>48–52</td><td>30</td><td>22</td><td>28</td></tr>
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+
+    <!-- SHORTS -->
+    <section class="size-section">
+
+        <h2>Shorts</h2>
+
+        <p class="size-section-description">
+            Measure around your natural waist for the best fit.
+        </p>
+
+        <div class="size-table-wrapper">
+
+            <table class="size-table">
+
+                <thead>
+                    <tr>
+                        <th>Size</th>
+                        <th>Waist (in)</th>
+                        <th>Hip (in)</th>
+                        <th>Outseam (in)</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr><td class="size-name">XS</td><td>26–28</td><td>34–36</td><td>17</td></tr>
+                    <tr><td class="size-name">S</td><td>28–30</td><td>36–38</td><td>18</td></tr>
+                    <tr><td class="size-name">M</td><td>30–32</td><td>38–40</td><td>19</td></tr>
+                    <tr><td class="size-name">L</td><td>32–35</td><td>40–43</td><td>20</td></tr>
+                    <tr><td class="size-name">XL</td><td>35–38</td><td>43–46</td><td>21</td></tr>
+                    <tr><td class="size-name">XXL</td><td>38–42</td><td>46–50</td><td>22</td></tr>
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+
+    <!-- PANTS -->
+    <section class="size-section">
+
+        <h2>Pants</h2>
+
+        <p class="size-section-description">
+            Measure your waist and inseam to find your best size.
+        </p>
+
+        <div class="size-table-wrapper">
+
+            <table class="size-table">
+
+                <thead>
+                    <tr>
+                        <th>Size</th>
+                        <th>Waist (in)</th>
+                        <th>Hip (in)</th>
+                        <th>Inseam (in)</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr><td class="size-name">XS</td><td>26–28</td><td>34–36</td><td>29</td></tr>
+                    <tr><td class="size-name">S</td><td>28–30</td><td>36–38</td><td>30</td></tr>
+                    <tr><td class="size-name">M</td><td>30–32</td><td>38–40</td><td>31</td></tr>
+                    <tr><td class="size-name">L</td><td>32–35</td><td>40–43</td><td>32</td></tr>
+                    <tr><td class="size-name">XL</td><td>35–38</td><td>43–46</td><td>32</td></tr>
+                    <tr><td class="size-name">XXL</td><td>38–42</td><td>46–50</td><td>33</td></tr>
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+
+    <!-- HOW TO MEASURE -->
+    <section class="measure-section">
+
+        <h2>How To Measure</h2>
+
+        <div class="measure-grid">
+
+            <div class="measure-card">
+
+                <div class="measure-number">1</div>
+
+                <h3>Chest</h3>
+
+                <p>
+                    Wrap the measuring tape around the
+                    fullest part of your chest. Keep the tape
+                    level and comfortable.
+                </p>
+
+            </div>
+
+            <div class="measure-card">
+
+                <div class="measure-number">2</div>
+
+                <h3>Waist</h3>
+
+                <p>
+                    Measure around your natural waist.
+                    Keep the tape comfortably snug without
+                    pulling it too tight.
+                </p>
+
+            </div>
+
+            <div class="measure-card">
+
+                <div class="measure-number">3</div>
+
+                <h3>Inseam</h3>
+
+                <p>
+                    Measure from the crotch down to the
+                    bottom of your ankle to determine your
+                    ideal pants length.
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- SIZE NOTE -->
+    <div class="size-note">
+
+        <h3>Important Note</h3>
+
+        <p>
+            These measurements are a general guide and may
+            vary slightly depending on the product style and
+            fabric. If you are between two sizes, we recommend
+            choosing the larger size for a more comfortable fit.
+        </p>
+
+    </div>
+
+
+    <!-- SHOP BUTTON -->
+    <div class="size-button-container">
+
+        <a href="{{ path('collections') }}" class="shop-button">
+            Shop Collection
+        </a>
+
+    </div>
+
+</main>
+
+{% endblock %}

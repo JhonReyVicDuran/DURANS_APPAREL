@@ -1,0 +1,369 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}FAQs | DURAN'S Apparel{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/faqs.css') }}">
+{% endblock %}
+
+{% block body %}
+
+<main class="faq-container">
+
+    <!-- FAQ HEADER -->
+    <div class="faq-header">
+
+        <h1>FAQs</h1>
+
+        <p>
+            Have questions about DURAN'S Apparel?
+            Find answers to some of the most common questions
+            about our products, orders, cart & items, and delivery.
+        </p>
+
+    </div>
+
+
+    <!-- PRODUCTS -->
+    <section class="faq-section">
+
+        <h2 class="faq-category">Products</h2>
+
+        <div class="faq-item">
+            <button type="button" class="faq-question" aria-expanded="false">
+                <span>What sizes are available?</span>
+                <span class="faq-icon">+</span>
+            </button>
+
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    Our clothing is generally available in XS, S, M, L, XL, and XXL.
+                    However, available sizes may vary depending on the product.
+
+                    <br><br>
+
+                    Please check our
+                    <a href="{{ path('size_guide') }}">Size Guide</a>
+                    before placing your order.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button type="button" class="faq-question" aria-expanded="false">
+                <span>How do I choose the right size?</span>
+                <span class="faq-icon">+</span>
+            </button>
+
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    We recommend measuring your chest, waist, hips, and inseam
+                    and comparing your measurements with our Size Guide.
+
+                    <br><br>
+
+                    If you are between two sizes, choosing the larger size
+                    may provide a more comfortable fit.
+
+                    <br><br>
+
+                    <a href="{{ path('size_guide') }}">View our Size Guide</a>.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button type="button" class="faq-question" aria-expanded="false">
+                <span>Are the compression shirts supposed to fit tightly?</span>
+                <span class="faq-icon">+</span>
+            </button>
+
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    Yes. Compression shirts are designed to have a closer
+                    and more fitted feel compared with regular T-shirts.
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+
+    <!-- ORDERS -->
+    <section class="faq-section">
+
+        <h2 class="faq-category">Orders</h2>
+
+        <div class="faq-item">
+            <button type="button" class="faq-question" aria-expanded="false">
+                <span>Do I need an account to place an order?</span>
+                <span class="faq-icon">+</span>
+            </button>
+
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    Yes. You need to log in to your DURAN'S Apparel account
+                    before adding products to your cart and placing an order.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button type="button" class="faq-question" aria-expanded="false">
+                <span>How can I view my orders?</span>
+                <span class="faq-icon">+</span>
+            </button>
+
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    After logging in, click <strong>Track Order</strong>
+                    in the bottom footer bar.
+
+                    <br><br>
+
+                    You will be able to see your orders, the items you
+                    purchased, your total amount, and the current order status.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button type="button" class="faq-question" aria-expanded="false">
+                <span>Can I change my order after placing it?</span>
+                <span class="faq-icon">+</span>
+            </button>
+
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    Orders are processed after they are placed.
+                    If you need to make a change, contact us as soon
+                    as possible through our
+                    <a href="{{ path('contact') }}">Contact Us page</a>.
+
+                    <br><br>
+
+                    Changes may not be possible once the order has
+                    already been processed or shipped.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button type="button" class="faq-question" aria-expanded="false">
+                <span>Where can I track my order?</span>
+                <span class="faq-icon">+</span>
+            </button>
+
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    Log in to your account and open
+                    <strong>Track Order</strong> at the bottom part
+                    of the home page.
+
+                    <br><br>
+
+                    Your order status will show whether your order
+                    is Pending, Processing, Shipped, or Completed.
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+
+    <!-- CART AND PAYMENT -->
+    <section class="faq-section">
+
+        <h2 class="faq-category">Cart &amp; Payment</h2>
+
+        <div class="faq-item">
+            <button type="button" class="faq-question" aria-expanded="false">
+                <span>How do I add an item to my cart?</span>
+                <span class="faq-icon">+</span>
+            </button>
+
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    Go to the Collections page, choose the product you want,
+                    select the quantity and size, and click
+                    <strong>ADD TO CART</strong>.
+
+                    <br><br>
+
+                    <a href="{{ path('collections') }}">Browse Collections</a>.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button type="button" class="faq-question" aria-expanded="false">
+                <span>Can I change the quantity of an item in my cart?</span>
+                <span class="faq-icon">+</span>
+            </button>
+
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    Yes. Open your cart and use the plus or minus buttons
+                    beside the product to change the quantity.
+
+                    <br><br>
+
+                    The quantity cannot exceed the available stock.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button type="button" class="faq-question" aria-expanded="false">
+                <span>What happens when a product is out of stock?</span>
+                <span class="faq-icon">+</span>
+            </button>
+
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    Products with no available stock cannot be added
+                    to the cart. Please check again later for availability.
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+
+    <!-- DELIVERY -->
+    <section class="faq-section">
+
+        <h2 class="faq-category">Delivery</h2>
+
+        <div class="faq-item">
+            <button type="button" class="faq-question" aria-expanded="false">
+                <span>How long does delivery take?</span>
+                <span class="faq-icon">+</span>
+            </button>
+
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    Delivery time may vary depending on your location
+                    and the current delivery schedule. Please check
+                    your order status for updates.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button type="button" class="faq-question" aria-expanded="false">
+                <span>How do I know if my order has been shipped?</span>
+                <span class="faq-icon">+</span>
+            </button>
+
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    Your order status will change to <strong>Shipped</strong>
+                    once your order has been prepared and sent for delivery.
+
+                    <br><br>
+
+                    You can check this through Track Order at the bottom
+                    part of the page.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button type="button" class="faq-question" aria-expanded="false">
+                <span>What if my order arrives damaged or incomplete?</span>
+                <span class="faq-icon">+</span>
+            </button>
+
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    Please contact DURAN'S Apparel as soon as possible
+                    and provide your order number and details about
+                    the problem so we can assist you.
+
+                    <br><br>
+
+                    <a href="{{ path('contact') }}">Contact Us</a>.
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+
+    <!-- ACCOUNT -->
+    <section class="faq-section">
+
+        <h2 class="faq-category">Account</h2>
+
+        <div class="faq-item">
+            <button type="button" class="faq-question" aria-expanded="false">
+                <span>How do I create an account?</span>
+                <span class="faq-icon">+</span>
+            </button>
+
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    Click <strong>SIGN UP</strong> in the navigation bar
+                    and enter the required information to create your
+                    DURAN'S Apparel account.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button type="button" class="faq-question" aria-expanded="false">
+                <span>I forgot my password. What should I do?</span>
+                <span class="faq-icon">+</span>
+            </button>
+
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    If you forget your password, contact DURAN'S Apparel
+                    for assistance with your account.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button type="button" class="faq-question" aria-expanded="false">
+                <span>Can I log out and still keep my account?</span>
+                <span class="faq-icon">+</span>
+            </button>
+
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    Yes. Logging out only ends your current session.
+                    Your account and order history will remain saved.
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+
+    <!-- CONTACT BOX -->
+    <section class="faq-contact">
+
+        <h2>Still Have Questions?</h2>
+
+        <p>
+            If you couldn't find the answer you're looking for,
+            feel free to contact DURAN'S Apparel.
+        </p>
+
+        <a href="{{ path('contact') }}">
+            Contact Us
+        </a>
+
+    </section>
+
+</main>
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('js/faqs.js') }}" defer></script>
+{% endblock %}
