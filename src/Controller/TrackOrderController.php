@@ -2,46 +2,23 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
+use App\Repository\OrderRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 class TrackOrderController extends AbstractController
 {
     #[Route('/my-orders', name: 'track_orders', methods: ['GET'])]
-    public function index(Request $request): Response
+    public function index(OrderRepository $orderRepository): Response
     {
-        // Check if the customer is logged in.
-        if (!$this->getUser()) {
+        $user = $this->getUser();
+
+        if (!$user instanceof User) {
             return $this->redirectToRoute('login');
         }
 
-        $session = $request->getSession();
-
-        // Get the ID of the currently logged-in customer.
-        $userId = $this->getUser()->getId();
-
-        // Retrieve all temporarily saved orders.
-        $allOrders = $session->get('orders', []);
-
-        // Only retrieve orders belonging to this customer.
-        // Ignore older orders that do not have a user_id.
-        $orders = array_filter(
-            $allOrders,
-            function ($order) use ($userId) {
-                return isset($order['user_id'])
-                    && (int) $order['user_id'] === (int) $userId;
-            }
-        );
-
-        // Sort newest orders first.
-        usort($orders, function ($a, $b) {
-            return strtotime($b['created_at'])
-                <=> strtotime($a['created_at']);
-        });
-
-        // Prepare order progress information.
         $steps = [
             'Pending',
             'Processing',
@@ -49,27 +26,61 @@ class TrackOrderController extends AbstractController
             'Completed',
         ];
 
-        foreach ($orders as &$order) {
-            $currentStep = array_search(
-                $order['status'],
-                $steps,
-                true
-            );
+        $ordersFromDatabase = $orderRepository->findBy(
+            ['user' => $user],
+            ['createdAt' => 'DESC']
+        );
 
-            $order['current_step'] = $currentStep === false
-                ? -1
-                : $currentStep;
+        $orders = [];
 
-            // Calculate item subtotals.
-            foreach ($order['items'] as &$item) {
-                $item['subtotal'] =
-                    $item['price'] * $item['quantity'];
+        foreach ($ordersFromDatabase as $order) {
+            $items = [];
+
+            foreach ($order->getItems() as $orderItem) {
+                $quantity = $orderItem->getQuantity();
+                $price = (float) $orderItem->getUnitPrice();
+
+                // Use the saved image first.
+                $image = $orderItem->getProductImage();
+
+                // Fall back to the current product image if necessary.
+                if (empty($image) && $orderItem->getProduct()) {
+                    $image = $orderItem->getProduct()->getImage();
+                }
+
+                $items[] = [
+                    'name' => $orderItem->getProductName(),
+                    'image' => $image,
+                    'quantity' => $quantity,
+                    'size' => $orderItem->getSize(),
+                    'price' => $price,
+                    'subtotal' => $price * $quantity,
+                ];
             }
 
-            unset($item);
-        }
+            $status = $order->getStatus();
+            $currentStep = array_search($status, $steps, true);
 
-        unset($order);
+            if ($currentStep === false) {
+                $currentStep = 0;
+            } else {
+                $currentStep++;
+            }
+
+            $orders[] = [
+                'order_number' => $order->getOrderNumber(),
+                'created_at' => $order->getCreatedAt(),
+                'status' => $order->getStatus(),
+                'current_step' => $currentStep,
+                'items' => $items,
+                'customer_name' => $order->getCustomerName(),
+                'email' => $order->getEmail(),
+                'phone' => $order->getPhone(),
+                'address' => $order->getAddress(),
+                'payment_method' => $order->getPaymentMethod(),
+                'total_amount' => $order->getTotalAmount(),
+            ];
+        }
 
         return $this->render('home/orders.html.twig', [
             'orders' => $orders,

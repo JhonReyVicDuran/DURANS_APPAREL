@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Repository\ProductRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -10,107 +11,97 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class CartController extends AbstractController
 {
-    // Temporary product catalog.
-    private function getProducts(): array
-    {
-        return [
-            1 => [
-                'id' => 1,
-                'name' => 'Classic Black Shirt',
-                'category' => 'T-Shirt',
-                'price' => 499.00,
-                'image' => 'admin/images/tshirt.png',
-                'stock' => 15,
-                'sizes' => ['S', 'M', 'L', 'XL'],
-            ],
-            2 => [
-                'id' => 2,
-                'name' => 'Essential White Shirt',
-                'category' => 'T-Shirt',
-                'price' => 450.00,
-                'image' => 'admin/images/tshirt.png',
-                'stock' => 12,
-                'sizes' => ['XS', 'S', 'M', 'L', 'XL'],
-            ],
-            3 => [
-                'id' => 3,
-                'name' => 'Premium Black Hoodie',
-                'category' => 'Hoodie',
-                'price' => 899.00,
-                'image' => 'admin/images/hoodie.png',
-                'stock' => 8,
-                'sizes' => ['M', 'L', 'XL', 'XXL'],
-            ],
-            4 => [
-                'id' => 4,
-                'name' => 'Classic Training Shorts',
-                'category' => 'Shorts',
-                'price' => 599.00,
-                'image' => 'admin/images/shorts.png',
-                'stock' => 0,
-                'sizes' => ['S', 'M', 'L'],
-            ],
-            5 => [
-                'id' => 5,
-                'name' => 'Compression Shirt',
-                'category' => 'Compression Wear',
-                'price' => 699.00,
-                'image' => 'admin/images/compression.png',
-                'stock' => 10,
-                'sizes' => ['S', 'M', 'L', 'XL'],
-            ],
-            6 => [
-                'id' => 6,
-                'name' => 'Essential Cap',
-                'category' => 'Accessories',
-                'price' => 299.00,
-                'image' => 'admin/images/cap.png',
-                'stock' => 20,
-                'sizes' => ['ONE SIZE'],
-            ],
-        ];
-    }
-
-    // Check Symfony authentication.
     private function isLoggedIn(): bool
     {
         return $this->getUser() !== null;
     }
 
-    // Display shopping cart.
-    #[Route('/cart', name: 'cart', methods: ['GET'])]
-    public function index(Request $request): Response
+    // Convert the database image value into its public browser path.
+    private function getProductImagePath(?string $image): ?string
     {
+        if ($image === null || trim($image) === '') {
+            return null;
+        }
+
+        $image = ltrim(str_replace('\\', '/', trim($image)), '/');
+
+        if (str_starts_with($image, 'admin/images/')) {
+            return $image;
+        }
+
+        if (str_starts_with($image, 'products/')) {
+            return 'admin/images/' . $image;
+        }
+
+        return 'admin/images/products/' . $image;
+    }
+
+    #[Route('/cart', name: 'cart', methods: ['GET'])]
+    public function index(
+        Request $request,
+        ProductRepository $productRepository
+    ): Response {
         if (!$this->isLoggedIn()) {
             return $this->redirectToRoute('login');
         }
 
-        $cart = $request->getSession()->get('cart', []);
+        $session = $request->getSession();
+        $cart = $session->get('cart', []);
 
+        $refreshedCart = [];
         $subtotal = 0;
         $itemCount = 0;
 
-        foreach ($cart as &$item) {
-            $item['item_total'] = $item['price'] * $item['quantity'];
+        foreach ($cart as $itemKey => $item) {
+            $product = $productRepository->find((int) $item['id']);
+
+            if (!$product) {
+                continue;
+            }
+
+            $quantity = (int) $item['quantity'];
+            $size = (string) ($item['size'] ?? '');
+            $availableSizes = $product->getSizes() ?? [];
+
+            if (
+                $quantity < 1 ||
+                !in_array($size, $availableSizes, true)
+            ) {
+                continue;
+            }
+
+            $item['item_key'] = $itemKey;
+            $item['id'] = $product->getId();
+            $item['name'] = $product->getProductName();
+            $item['category'] = $product->getCategory()->getCategoryname();
+            $item['price'] = $product->getPrice();
+            $item['image'] = $this->getProductImagePath($product->getImage());
+            $item['stock'] = $product->getStock();
+            $item['quantity'] = $quantity;
+            $item['item_total'] = (float) $product->getPrice() * $quantity;
+
+            $refreshedCart[$itemKey] = $item;
 
             $subtotal += $item['item_total'];
-            $itemCount += $item['quantity'];
+            $itemCount += $quantity;
         }
 
-        unset($item);
+        $session->set('cart', $refreshedCart);
 
         return $this->render('home/cart.html.twig', [
-            'cartItems' => $cart,
+            'cartItems' => $refreshedCart,
             'subtotal' => $subtotal,
             'itemCount' => $itemCount,
             'total' => $subtotal,
         ]);
     }
 
-    // Add product to cart.
     #[Route('/cart/add/{id}', name: 'cart_add', methods: ['POST'])]
-    public function add(Request $request, int $id): JsonResponse
-    {
+    public function add(
+        Request $request,
+        int $id,
+        ProductRepository $productRepository
+    ): JsonResponse {
         if (!$this->isLoggedIn()) {
             return $this->json([
                 'success' => false,
@@ -119,9 +110,9 @@ class CartController extends AbstractController
             ], 401);
         }
 
-        $products = $this->getProducts();
+        $product = $productRepository->find($id);
 
-        if (!isset($products[$id])) {
+        if (!$product) {
             return $this->json([
                 'success' => false,
                 'message' => 'Product not found.',
@@ -129,7 +120,6 @@ class CartController extends AbstractController
         }
 
         $data = $request->toArray();
-
         $size = trim((string) ($data['size'] ?? ''));
 
         $quantity = filter_var(
@@ -137,16 +127,17 @@ class CartController extends AbstractController
             FILTER_VALIDATE_INT
         );
 
-        $product = $products[$id];
+        $availableSizes = $product->getSizes() ?? [];
+        $stock = $product->getStock();
 
-        if ($product['stock'] < 1) {
+        if ($stock < 1) {
             return $this->json([
                 'success' => false,
                 'message' => 'This product is out of stock.',
             ], 400);
         }
 
-        if (!in_array($size, $product['sizes'], true)) {
+        if (!in_array($size, $availableSizes, true)) {
             return $this->json([
                 'success' => false,
                 'message' => 'Please select a valid size.',
@@ -160,45 +151,42 @@ class CartController extends AbstractController
             ], 400);
         }
 
-        if ($quantity > $product['stock']) {
-            return $this->json([
-                'success' => false,
-                'message' => 'The selected quantity exceeds available stock.',
-            ], 400);
-        }
-
         $session = $request->getSession();
         $cart = $session->get('cart', []);
 
         $itemKey = $id . '_' . $size;
+        $existingProductQuantity = 0;
 
-        $existingQuantity = $cart[$itemKey]['quantity'] ?? 0;
-        $newQuantity = $existingQuantity + $quantity;
+        foreach ($cart as $item) {
+            if ((int) $item['id'] === $id) {
+                $existingProductQuantity += (int) $item['quantity'];
+            }
+        }
 
-        if ($newQuantity > $product['stock']) {
+        if ($existingProductQuantity + $quantity > $stock) {
             return $this->json([
                 'success' => false,
                 'message' => 'You cannot add more than the available stock.',
             ], 400);
         }
 
+        $newQuantity = ($cart[$itemKey]['quantity'] ?? 0) + $quantity;
+
         $cart[$itemKey] = [
             'item_key' => $itemKey,
-            'id' => $product['id'],
-            'name' => $product['name'],
-            'category' => $product['category'],
-            'price' => $product['price'],
-            'image' => $product['image'],
-            'stock' => $product['stock'],
+            'id' => $product->getId(),
+            'name' => $product->getProductName(),
+            'category' => $product->getCategory()->getCategoryname(),
+            'price' => $product->getPrice(),
+            'image' => $this->getProductImagePath($product->getImage()),
+            'stock' => $stock,
             'size' => $size,
             'quantity' => $newQuantity,
         ];
 
         $session->set('cart', $cart);
 
-        $cartCount = array_sum(
-            array_column($cart, 'quantity')
-        );
+        $cartCount = array_sum(array_column($cart, 'quantity'));
 
         return $this->json([
             'success' => true,
@@ -207,10 +195,11 @@ class CartController extends AbstractController
         ]);
     }
 
-    // Update cart quantity.
     #[Route('/cart/update', name: 'cart_update', methods: ['POST'])]
-    public function update(Request $request): JsonResponse
-    {
+    public function update(
+        Request $request,
+        ProductRepository $productRepository
+    ): JsonResponse {
         if (!$this->isLoggedIn()) {
             return $this->json([
                 'success' => false,
@@ -220,7 +209,6 @@ class CartController extends AbstractController
         }
 
         $data = $request->toArray();
-
         $itemKey = (string) ($data['itemKey'] ?? '');
 
         $quantity = filter_var(
@@ -245,7 +233,37 @@ class CartController extends AbstractController
             ], 400);
         }
 
-        if ($quantity > $cart[$itemKey]['stock']) {
+        $productId = (int) $cart[$itemKey]['id'];
+        $product = $productRepository->find($productId);
+
+        if (!$product) {
+            return $this->json([
+                'success' => false,
+                'message' => 'This product is no longer available.',
+            ], 404);
+        }
+
+        $availableSizes = $product->getSizes() ?? [];
+
+        if (!in_array($cart[$itemKey]['size'], $availableSizes, true)) {
+            return $this->json([
+                'success' => false,
+                'message' => 'The selected size is no longer available.',
+            ], 400);
+        }
+
+        $otherQuantity = 0;
+
+        foreach ($cart as $key => $item) {
+            if (
+                $key !== $itemKey &&
+                (int) $item['id'] === $productId
+            ) {
+                $otherQuantity += (int) $item['quantity'];
+            }
+        }
+
+        if ($otherQuantity + $quantity > $product->getStock()) {
             return $this->json([
                 'success' => false,
                 'message' => 'The selected quantity exceeds available stock.',
@@ -253,6 +271,11 @@ class CartController extends AbstractController
         }
 
         $cart[$itemKey]['quantity'] = $quantity;
+        $cart[$itemKey]['name'] = $product->getProductName();
+        $cart[$itemKey]['category'] = $product->getCategory()->getCategoryname();
+        $cart[$itemKey]['price'] = $product->getPrice();
+        $cart[$itemKey]['image'] = $this->getProductImagePath($product->getImage());
+        $cart[$itemKey]['stock'] = $product->getStock();
 
         $session->set('cart', $cart);
 
@@ -262,7 +285,6 @@ class CartController extends AbstractController
         ]);
     }
 
-    // Remove cart item.
     #[Route('/cart/remove', name: 'cart_remove', methods: ['POST'])]
     public function remove(Request $request): JsonResponse
     {
@@ -288,7 +310,6 @@ class CartController extends AbstractController
         }
 
         unset($cart[$itemKey]);
-
         $session->set('cart', $cart);
 
         return $this->json([
@@ -297,7 +318,6 @@ class CartController extends AbstractController
         ]);
     }
 
-    // Clear cart.
     #[Route('/cart/clear', name: 'cart_clear', methods: ['POST'])]
     public function clear(Request $request): JsonResponse
     {

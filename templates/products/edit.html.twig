@@ -1,0 +1,98 @@
+
+{% extends 'admin_base.html.twig' %}
+
+{% block title %}Edit Product - DURAN'S Apparel{% endblock %}
+
+{% block body %}
+<link rel="stylesheet" href="{{ asset('css/delete-modal.css') }}">
+
+<section class="content-section">
+    <div class="section-heading">
+        <h2>EDIT PRODUCT</h2>
+        <p>Update product information</p>
+    </div>
+
+    {% if error %}
+        <div class="error-message">{{ error }}</div>
+    {% endif %}
+
+    <div class="product-panel">
+        <h3>UPDATE PRODUCT DETAILS</h3>
+
+        <form method="POST" action="{{ path('admin_product_edit', {id: product.id}) }}" enctype="multipart/form-data">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('edit_product_' ~ product.id) }}">
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Product Name</label>
+                    <input type="text" name="product_name" value="{{ product.productName }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Category</label>
+                    <select name="category_id" required>
+                        <option value="">Select Category</option>
+                        {% for category in categories %}
+                            <option value="{{ category.id }}" {% if product.category and product.category.id == category.id %}selected{% endif %}>
+                                {{ category.categoryname }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Price (₱)</label>
+                    <input type="number" name="price" value="{{ product.price }}" min="0" step="0.01" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Stock</label>
+                    <input type="number" name="stock" value="{{ product.stock }}" min="0" step="1" required>
+                </div>
+            </div>
+
+            <div class="form-group full-width">
+                <label>Available Sizes</label>
+                <select name="sizes[]" multiple required style="min-height: 130px;">
+                    {% for size in availableSizes %}
+                        <option value="{{ size }}" {% if size in product.sizes %}selected{% endif %}>
+                            {{ size }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <small>Hold CTRL and click to select multiple sizes.</small>
+            </div>
+
+            <div class="form-group full-width">
+                <label>Current Product Image</label>
+
+                {% if product.image %}
+                    <div class="current-product-image">
+                        <img src="{{ asset('admin/images/' ~ product.image) }}" alt="{{ product.productName }}">
+                    </div>
+                {% else %}
+                    <p>No image uploaded yet.</p>
+                {% endif %}
+            </div>
+
+            <div class="form-group full-width">
+                <label>Replace Product Image</label>
+                <input type="file" name="image" accept="image/jpeg,image/png,image/webp">
+                <small>Leave this empty to keep the current image. JPG, PNG, or WEBP. Maximum size: 5 MB.</small>
+            </div>
+
+            <div class="form-group full-width">
+                <label>Description</label>
+                <textarea name="description" rows="5" required>{{ product.description }}</textarea>
+            </div>
+
+            <div class="form-actions edit-form-actions">
+                <a href="{{ path('admin_products') }}" class="cancel-edit-btn">Cancel</a>
+                <button type="submit" class="add-product-btn">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

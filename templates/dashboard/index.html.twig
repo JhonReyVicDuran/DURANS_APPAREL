@@ -3,78 +3,165 @@
 {% block title %}Admin Dashboard - DURAN'S Apparel{% endblock %}
 
 {% block body %}
-
 <div class="admin-layout">
-
     {% include 'partials/sidebar.html.twig' %}
 
-    <main class="main-content">
+    <main class="main-content dashboard-page">
 
-        <section class="stats-container">
+        <!-- DASHBOARD HEADER -->
+        <section class="dashboard-header">
+            <div>
+                <h2>Dashboard Overview</h2>
+                <p>Welcome to your DURAN'S Apparel management dashboard.</p>
+            </div>
 
-            <!-- TOTAL PRODUCTS -->
-            <div class="stat-card">
+            <div class="dashboard-date">
+                {{ "now"|date("F d, Y") }}
+            </div>
+        </section>
 
-                <div class="stat-icon">
-                    P
-                </div>
+        <!-- STATISTICS -->
+        <section class="dashboard-stats">
 
-                <div class="stat-info">
+            <div class="dashboard-stat-card">
+                <div class="dashboard-stat-icon">P</div>
+                <div class="dashboard-stat-info">
                     <span>TOTAL PRODUCTS</span>
                     <strong>{{ total_products }}</strong>
                 </div>
-
             </div>
 
-
-            <!-- LOW STOCK -->
-            <div class="stat-card">
-
-                <div class="stat-icon">
-                    !
-                </div>
-
-                <div class="stat-info">
+            <div class="dashboard-stat-card red-accent">
+                <div class="dashboard-stat-icon">!</div>
+                <div class="dashboard-stat-info">
                     <span>LOW STOCK</span>
                     <strong>{{ low_stock }}</strong>
                 </div>
-
             </div>
 
-
-            <!-- TOTAL ORDERS -->
-            <div class="stat-card">
-
-                <div class="stat-icon">
-                    O
-                </div>
-
-                <div class="stat-info">
+            <div class="dashboard-stat-card">
+                <div class="dashboard-stat-icon">O</div>
+                <div class="dashboard-stat-info">
                     <span>TOTAL ORDERS</span>
                     <strong>{{ total_orders }}</strong>
                 </div>
-
             </div>
 
-
-            <!-- COMPLETED SALES -->
-            <div class="stat-card">
-
-                <div class="stat-icon">
-                    $
-                </div>
-
-                <div class="stat-info">
+            <div class="dashboard-stat-card red-accent">
+                <div class="dashboard-stat-icon">₱</div>
+                <div class="dashboard-stat-info">
                     <span>COMPLETED SALES</span>
-                    <strong>₱{{ total_sales|number_format(2) }}</strong>
+                    <strong>₱{{ total_sales|number_format(2, '.', ',') }}</strong>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- DASHBOARD DETAILS -->
+        <section class="dashboard-panels">
+
+            <!-- RECENT ORDERS -->
+            <div class="dashboard-panel">
+
+                <div class="dashboard-panel-header">
+                    <h3>Recent Orders</h3>
+                    <span>Latest 5 orders</span>
                 </div>
 
+                <div class="dashboard-panel-content">
+
+                    <div class="dashboard-table-wrapper">
+                        <table class="dashboard-table">
+                            <thead>
+                                <tr>
+                                    <th>ORDER</th>
+                                    <th>CUSTOMER</th>
+                                    <th>TOTAL</th>
+                                    <th>STATUS</th>
+                                    <th>DATE</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {% for order in recent_orders %}
+                                    <tr>
+                                        <td class="dashboard-order-number">
+                                            #{{ order.orderNumber }}
+                                        </td>
+
+                                        <td class="dashboard-customer">
+                                            {{ order.customerName }}
+                                        </td>
+
+                                        <td>
+                                            ₱{{ order.totalAmount|number_format(2, '.', ',') }}
+                                        </td>
+
+                                        <td>
+                                            <span class="dashboard-status {{ order.status|lower }}">
+                                                {{ order.status }}
+                                            </span>
+                                        </td>
+
+                                        <td class="dashboard-date-cell">
+                                            {{ order.createdAt|date('M d, Y') }}
+                                        </td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td colspan="5" class="dashboard-empty">
+                                            No orders available yet.
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <a href="{{ path('admin_orders') }}" class="dashboard-view-all">
+                        VIEW ALL ORDERS →
+                    </a>
+
+                </div>
+            </div>
+
+            <!-- LOW STOCK PRODUCTS -->
+            <div class="dashboard-panel">
+
+                <div class="dashboard-panel-header">
+                    <h3>Low Stock Products</h3>
+                    <span>5 or fewer remaining</span>
+                </div>
+
+                <div class="dashboard-panel-content">
+
+                    <div class="dashboard-low-stock-list">
+                        {% for product in low_stock_products %}
+                            <div class="dashboard-stock-item">
+                                <span class="dashboard-stock-name">
+                                    {{ product.productName }}
+                                </span>
+
+                                <span class="dashboard-stock-warning">
+                                    {{ product.stock }} left
+                                </span>
+                            </div>
+                        {% else %}
+                            <div class="dashboard-empty">
+                                All products have sufficient stock.
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <a href="{{ path('admin_products') }}" class="dashboard-view-all">
+                        MANAGE PRODUCTS →
+                    </a>
+
+                </div>
             </div>
 
         </section>
 
     </main>
-
 </div>
-
 {% endblock %}

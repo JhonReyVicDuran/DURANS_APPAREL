@@ -1,0 +1,201 @@
+
+/* ==========================================
+   PRODUCT FORM SELECT FIELDS
+========================================== */
+
+.form-group select {
+    display: block;
+    width: 100%;
+    min-height: 46px;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 0;
+    background-color: #fff;
+    color: #111;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    outline: none;
+    cursor: pointer;
+}
+
+.form-group select:focus {
+    border-color: #000;
+}
+
+.form-group select[multiple] {
+    min-height: 130px;
+    padding: 8px;
+}
+
+.form-group select option {
+    padding: 7px;
+}
+
+/* ==========================================
+   DELETE CONFIRMATION MODAL
+========================================== */
+
+.delete-modal-overlay[hidden] {
+    display: none;
+}
+
+.delete-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(3px);
+}
+
+.delete-modal {
+    width: 100%;
+    max-width: 430px;
+    background: #fff;
+    border: 1px solid #222;
+    box-shadow: 0 15px 45px rgba(0, 0, 0, 0.3);
+    animation: modalAppear 0.2s ease;
+}
+
+@keyframes modalAppear {
+    from {
+        opacity: 0;
+        transform: translateY(15px) scale(0.97);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* MODAL HEADER */
+
+.delete-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 22px;
+    background: #000;
+    color: #fff;
+}
+
+.delete-modal-header h3 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.modal-close-btn {
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: #fff;
+    font-size: 26px;
+    cursor: pointer;
+}
+
+/* MODAL BODY */
+
+.delete-modal-body {
+    padding: 30px 25px;
+    text-align: center;
+}
+
+.delete-modal-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 15px;
+    border: 2px solid #ff0000;
+    border-radius: 50%;
+    color: #ff0000;
+    font-size: 27px;
+    font-weight: bold;
+}
+
+.delete-modal-body h4 {
+    margin: 0 0 10px;
+    color: #111;
+    font-size: 21px;
+    font-weight: 800;
+}
+
+.delete-modal-body p {
+    margin: 0;
+    color: #666;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.delete-modal-body strong {
+    color: #111;
+}
+
+/* MODAL FOOTER */
+
+.delete-modal-footer {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    padding: 18px 22px;
+    border-top: 1px solid #eee;
+    background: #fafafa;
+}
+
+/* CANCEL BUTTON */
+
+.modal-cancel-btn {
+    padding: 11px 23px;
+    border: 1px solid #000;
+    background: #000;
+    color: #fff;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.modal-cancel-btn:hover {
+    background: #333;
+}
+
+/* DELETE BUTTON */
+
+.modal-delete-btn {
+    padding: 11px 23px;
+    border: 1px solid #ff0000;
+    background: #ff0000;
+    color: #fff;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.modal-delete-btn:hover {
+    background: #dc0000;
+}
+
+/* MOBILE */
+
+@media (max-width: 480px) {
+    .delete-modal {
+        max-width: 100%;
+    }
+
+    .delete-modal-footer {
+        flex-direction: column-reverse;
+    }
+
+    .modal-cancel-btn,
+    .modal-delete-btn {
+        width: 100%;
+    }
+}

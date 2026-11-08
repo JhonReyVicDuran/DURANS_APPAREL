@@ -15,6 +15,18 @@
             <p>Monitor and update customer orders</p>
         </div>
 
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success">
+                {{ message }}
+            </div>
+        {% endfor %}
+
+        {% for message in app.flashes('error') %}
+            <div class="alert alert-error">
+                {{ message }}
+            </div>
+        {% endfor %}
+
         <div class="orders-panel">
 
             <div class="orders-table-wrapper">
@@ -49,11 +61,30 @@
 
                             <tr>
                                 <td class="order-number">
-                                    #{{ order.order_id }}
+                                    <strong>#{{ order.orderNumber }}</strong>
+
+                                    <details>
+                                        <summary>View Items</summary>
+
+                                        <div class="order-items-details">
+                                            {% for item in order.items %}
+                                                <div>
+                                                    <strong>{{ item.productName }}</strong>
+                                                    <small>
+                                                        Size: {{ item.size }} |
+                                                        Quantity: {{ item.quantity }} |
+                                                        ₱{{ item.unitPrice|number_format(2, '.', ',') }}
+                                                    </small>
+                                                </div>
+                                            {% else %}
+                                                <small>No items found.</small>
+                                            {% endfor %}
+                                        </div>
+                                    </details>
                                 </td>
 
                                 <td class="customer-info">
-                                    <strong>{{ order.customer_name }}</strong>
+                                    <strong>{{ order.customerName }}</strong>
                                     <small>{{ order.email }}</small>
                                 </td>
 
@@ -66,27 +97,46 @@
                                 </td>
 
                                 <td class="order-total">
-                                    ₱{{ order.total_amount|number_format(2, '.', ',') }}
+                                    ₱{{ order.totalAmount|number_format(2, '.', ',') }}
                                 </td>
 
                                 <td>
-                                    <select
-                                        class="status-select status-{{ order.status|lower }}"
-                                        onchange="this.className='status-select status-' + this.value.toLowerCase()"
+                                    <form
+                                        method="POST"
+                                        action="{{ path('admin_orders') }}"
+                                        class="status-form"
                                     >
-                                        {% for status in ['Pending', 'Processing', 'Shipped', 'Completed', 'Cancelled'] %}
-                                            <option
-                                                value="{{ status }}"
-                                                {% if order.status == status %}selected{% endif %}
-                                            >
-                                                {{ status }}
-                                            </option>
-                                        {% endfor %}
-                                    </select>
+                                        <input
+                                            type="hidden"
+                                            name="order_id"
+                                            value="{{ order.id }}"
+                                        >
+
+                                        <input
+                                            type="hidden"
+                                            name="_token"
+                                            value="{{ csrf_token('update_order_status_' ~ order.id) }}"
+                                        >
+
+                                        <select
+                                            name="status"
+                                            class="status-select status-{{ order.status|lower }}"
+                                            onchange="this.form.submit()"
+                                        >
+                                            {% for status in statuses %}
+                                                <option
+                                                    value="{{ status }}"
+                                                    {% if order.status == status %}selected{% endif %}
+                                                >
+                                                    {{ status }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </form>
                                 </td>
 
                                 <td class="order-date">
-                                    {{ order.order_date }}
+                                    {{ order.createdAt|date('Y-m-d H:i:s') }}
                                 </td>
                             </tr>
 

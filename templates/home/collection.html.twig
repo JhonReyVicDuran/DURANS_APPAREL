@@ -1,3 +1,4 @@
+
 {% extends 'base.html.twig' %}
 
 {% block title %}Collections | DURAN'S Apparel{% endblock %}
@@ -8,195 +9,99 @@
 {% endblock %}
 
 {% block body %}
-
 <main class="collections-main" data-login-url="{{ path('login') }}">
-
-    <!-- COLLECTION HERO -->
     <section class="collection-hero">
-
         <div class="collection-hero-content">
-
             <p>DURAN'S APPAREL</p>
-
             <h1>
                 OUR <span>PRODUCTS</span>
             </h1>
-
             <div class="hero-line"></div>
-
             <p class="hero-description">
                 Discover our latest products.
                 Designed for comfort, style, and everyday wear.
                 Be what you wear.
             </p>
-
         </div>
-
     </section>
 
-    <!-- PRODUCTS SECTION -->
     <section class="collection-page">
-
         <div class="collection-heading">
             <h2>DISCOVER OUR COLLECTIONS</h2>
 
-            <!-- CATEGORY FILTER -->
-            <form
-                method="GET"
-                action="{{ path('collections') }}"
-                class="category-filter"
-            >
-
-                <label for="category-filter">
-                    FILTER BY CATEGORY
-                </label>
-
-                <select
-                    name="category"
-                    id="category-filter"
-                    onchange="this.form.submit()"
-                >
-
-                    <option value="">
-                        All Products
-                    </option>
-
+            <form method="GET" action="{{ path('collections') }}" class="category-filter">
+                <label for="category-filter">FILTER BY CATEGORY</label>
+                <select name="category" id="category-filter" onchange="this.form.submit()">
+                    <option value="">All Products</option>
                     {% for category in categories %}
-
-                        <option
-                            value="{{ category.id }}"
-                            {% if selectedCategoryId == category.id %}
-                                selected
-                            {% endif %}
-                        >
+                        <option value="{{ category.id }}" {% if selectedCategoryId == category.id %}selected{% endif %}>
                             {{ category.categoryname }}
                         </option>
-
                     {% endfor %}
-
                 </select>
-
             </form>
         </div>
 
-        <!-- PRODUCT GRID -->
         <div class="collection-grid">
-
             {% for product in products %}
-
-                <div
-                    class="collection-card"
-                    data-product-id="{{ product.id }}"
-                >
-
-                    <!-- PRODUCT IMAGE -->
+                <div class="collection-card" data-product-id="{{ product.id }}">
                     <div class="collection-image">
-
                         {% if product.id == 1 %}
                             <span class="product-badge">NEW!</span>
                         {% endif %}
 
                         {% if product.image %}
-
                             <img
-                                src="{{ asset(product.image) }}"
+                                src="{{ asset('admin/images/' ~ product.image) }}"
                                 alt="{{ product.productName }}"
+                                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
                             >
-
-                        {% else %}
-
-                            <div class="image-placeholder">
-
+                            <div class="image-placeholder" style="display: none;">
                                 <span>DURAN'S APPAREL</span>
-
-                                <small>
-                                    {{ product.category.categoryname }}
-                                </small>
-
+                                <small>{{ product.category.categoryname }}</small>
                             </div>
-
+                        {% else %}
+                            <div class="image-placeholder">
+                                <span>DURAN'S APPAREL</span>
+                                <small>{{ product.category.categoryname }}</small>
+                            </div>
                         {% endif %}
-
                     </div>
 
-                    <!-- PRODUCT INFORMATION -->
                     <div class="product-info">
-
                         <h3>{{ product.productName }}</h3>
 
                         <p class="product-type">
                             {{ product.category.categoryname }}
                         </p>
 
-                        <!-- PRICE AND STOCK -->
                         <div class="product-bottom">
-
                             <span class="price">
                                 ₱{{ product.price|number_format(2, '.', ',') }}
                             </span>
-
                             <span class="quantity">
                                 Stock: {{ product.stock }}
                             </span>
-
                         </div>
 
-                        <!-- PRODUCT ACTIONS -->
                         <div class="product-actions">
-
                             {% if product.stock > 0 %}
-
-                                <!-- SIZE SELECTOR -->
                                 <div class="size-selector">
-
-                                    <label for="size-{{ product.id }}">
-                                        SIZE
-                                    </label>
-
-                                    <select
-                                        id="size-{{ product.id }}"
-                                        class="size-select"
-                                    >
-
-                                        <option value="">
-                                            Select Size
-                                        </option>
-
+                                    <label for="size-{{ product.id }}">SIZE</label>
+                                    <select id="size-{{ product.id }}" class="size-select">
+                                        <option value="">Select Size</option>
                                         {% for size in product.sizes|default([]) %}
-
-                                            <option value="{{ size }}">
-                                                {{ size }}
-                                            </option>
-
+                                            <option value="{{ size }}">{{ size }}</option>
                                         {% else %}
-
-                                            <option value="" disabled>
-                                                No sizes configured
-                                            </option>
-
+                                            <option value="" disabled>No sizes configured</option>
                                         {% endfor %}
-
                                     </select>
-
                                 </div>
 
-                                <!-- QUANTITY SELECTOR -->
                                 <div class="quantity-selector">
-
-                                    <label for="quantity-{{ product.id }}">
-                                        QTY
-                                    </label>
-
+                                    <label for="quantity-{{ product.id }}">QTY</label>
                                     <div class="quantity-controls">
-
-                                        <button
-                                            type="button"
-                                            onclick="changeQuantity({{ product.id }}, -1)"
-                                            aria-label="Decrease quantity"
-                                        >
-                                            −
-                                        </button>
-
+                                        <button type="button" onclick="changeQuantity({{ product.id }}, -1)" aria-label="Decrease quantity">−</button>
                                         <input
                                             type="number"
                                             id="quantity-{{ product.id }}"
@@ -205,20 +110,10 @@
                                             max="{{ product.stock }}"
                                             readonly
                                         >
-
-                                        <button
-                                            type="button"
-                                            onclick="changeQuantity({{ product.id }}, 1)"
-                                            aria-label="Increase quantity"
-                                        >
-                                            +
-                                        </button>
-
+                                        <button type="button" onclick="changeQuantity({{ product.id }}, 1)" aria-label="Increase quantity">+</button>
                                     </div>
-
                                 </div>
 
-                                <!-- ADD TO CART -->
                                 <button
                                     type="button"
                                     class="add-cart"
@@ -227,53 +122,27 @@
                                 >
                                     ADD TO CART 🛒
                                 </button>
-
                             {% else %}
-
-                                <button
-                                    type="button"
-                                    class="add-cart out-of-stock"
-                                    disabled
-                                >
+                                <button type="button" class="add-cart out-of-stock" disabled>
                                     OUT OF STOCK
                                 </button>
-
                             {% endif %}
-
                         </div>
-
                     </div>
-
                 </div>
-
             {% else %}
-
                 <p class="no-products">
                     No products available in this category.
                 </p>
-
             {% endfor %}
-
         </div>
-
     </section>
-
 </main>
 
-<!-- CART NOTIFICATION -->
-<div
-    class="cart-notification"
-    id="cartNotification"
-    role="status"
-    aria-live="polite"
-></div>
-
+<div class="cart-notification" id="cartNotification" role="status" aria-live="polite"></div>
 {% endblock %}
 
 {% block javascripts %}
-
     {{ parent() }}
-
     <script src="{{ asset('js/collection.js') }}" defer></script>
-
 {% endblock %}

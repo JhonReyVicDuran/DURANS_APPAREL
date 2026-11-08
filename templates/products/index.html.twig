@@ -1,213 +1,164 @@
+
 {% extends 'admin_base.html.twig' %}
 
 {% block title %}Products - DURAN'S Apparel{% endblock %}
 
 {% block body %}
+<link rel="stylesheet" href="{{ asset('css/delete-modal.css') }}">
 
 <section class="content-section">
-
     <div class="section-heading">
         <h2>PRODUCTS</h2>
         <p>Manage products</p>
     </div>
 
     {% for message in app.flashes('success') %}
-        <div class="success-message">
-            {{ message }}
-        </div>
+        <div class="success-message">{{ message }}</div>
+    {% endfor %}
+
+    {% for message in app.flashes('error') %}
+        <div class="error-message">{{ message }}</div>
     {% endfor %}
 
     {% if error %}
-        <div class="error-message">
-            {{ error }}
-        </div>
+        <div class="error-message">{{ error }}</div>
     {% endif %}
 
-    <!-- ADD PRODUCT FORM -->
     <div class="product-panel">
-
         <h3>ADD NEW PRODUCT</h3>
 
-        <form method="POST" action="{{ path('admin_products') }}">
-
-            <input
-                type="hidden"
-                name="_csrf_token"
-                value="{{ csrf_token('add_product') }}"
-            >
+        <form method="POST" action="{{ path('admin_products') }}" enctype="multipart/form-data">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('add_product') }}">
 
             <div class="form-row">
-
                 <div class="form-group">
                     <label>Product Name</label>
-
-                    <input
-                        type="text"
-                        name="product_name"
-                        placeholder="Example: Classic Hoodie"
-                        required
-                    >
+                    <input type="text" name="product_name" placeholder="Example: Classic Hoodie" required>
                 </div>
 
                 <div class="form-group">
                     <label>Category</label>
-
                     <select name="category_id" required>
                         <option value="">Select Category</option>
-
                         {% for category in categories %}
-                            <option value="{{ category.id }}">
-                                {{ category.categoryname }}
-                            </option>
+                            <option value="{{ category.id }}">{{ category.categoryname }}</option>
                         {% endfor %}
                     </select>
                 </div>
-
             </div>
 
             <div class="form-row">
-
                 <div class="form-group">
                     <label>Price (₱)</label>
-
-                    <input
-                        type="number"
-                        name="price"
-                        placeholder="0.00"
-                        min="0"
-                        step="0.01"
-                        required
-                    >
+                    <input type="number" name="price" placeholder="0.00" min="0" step="0.01" required>
                 </div>
 
                 <div class="form-group">
                     <label>Stock</label>
-
-                    <input
-                        type="number"
-                        name="stock"
-                        placeholder="0"
-                        min="0"
-                        step="1"
-                        required
-                    >
+                    <input type="number" name="stock" placeholder="0" min="0" step="1" required>
                 </div>
-
             </div>
 
             <div class="form-group full-width">
-
                 <label>Available Sizes</label>
-
-                <select
-                    name="sizes[]"
-                    multiple
-                    required
-                    style="min-height: 130px;"
-                >
+                <select name="sizes[]" multiple required style="min-height: 130px;">
                     {% for size in availableSizes %}
-                        <option value="{{ size }}">
-                            {{ size }}
-                        </option>
+                        <option value="{{ size }}">{{ size }}</option>
                     {% endfor %}
                 </select>
-
-                <small>
-                    Hold CTRL and click to select multiple sizes.
-                </small>
-
+                <small>Hold CTRL and click to select multiple sizes.</small>
             </div>
 
             <div class="form-group full-width">
+                <label>Product Image</label>
+                <input type="file" name="image" accept="image/jpeg,image/png,image/webp" required>
+                <small>Accepted formats: JPG, PNG, WEBP. Maximum size: 5 MB.</small>
+            </div>
 
+            <div class="form-group full-width">
                 <label>Description</label>
-
-                <textarea
-                    name="description"
-                    rows="5"
-                    placeholder="Product description"
-                    required
-                ></textarea>
-
+                <textarea name="description" rows="5" placeholder="Product description" required></textarea>
             </div>
 
             <div class="form-actions">
-
-                <button
-                    type="submit"
-                    class="add-product-btn"
-                >
-                    Add Product
-                </button>
-
+                <button type="submit" class="add-product-btn">Add Product</button>
             </div>
-
         </form>
-
     </div>
 
-    <!-- PRODUCT LIST -->
     <div class="product-panel">
-
         <h3>PRODUCT LIST</h3>
 
         {% if products is empty %}
-
             <p>No products have been added yet.</p>
-
         {% else %}
-
             <div class="table-responsive">
-
                 <table class="product-table">
-
                     <thead>
                         <tr>
                             <th>ID</th>
+                            <th>Image</th>
                             <th>Product Name</th>
                             <th>Category</th>
                             <th>Price</th>
                             <th>Stock</th>
                             <th>Sizes</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
 
                     <tbody>
-
                         {% for product in products %}
-
                             <tr>
                                 <td>{{ product.id }}</td>
-
+                                <td>
+                                    {% if product.image %}
+                                        <img src="{{ asset('admin/images/' ~ product.image) }}" alt="{{ product.productName }}" class="product-list-image">
+                                    {% else %}
+                                        No image
+                                    {% endif %}
+                                </td>
                                 <td>{{ product.productName }}</td>
-
-                                <td>
-                                    {{ product.category.categoryname }}
-                                </td>
-
-                                <td>
-                                    ₱{{ product.price }}
-                                </td>
-
+                                <td>{{ product.category.categoryname }}</td>
+                                <td>₱{{ product.price }}</td>
                                 <td>{{ product.stock }}</td>
+                                <td>{{ product.sizes|default([])|join(', ') }}</td>
+                                <td class="product-actions">
+                                    <a href="{{ path('admin_product_edit', {id: product.id}) }}" class="product-action-btn edit-btn">Edit</a>
 
-                                <td>
-                                    {{ product.sizes|default([])|join(', ') }}
+                                    <form id="delete-form-{{ product.id }}" method="POST" action="{{ path('admin_product_delete', {id: product.id}) }}">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete_product_' ~ product.id) }}">
+                                        <button type="button" class="product-action-btn delete-btn open-delete-modal" data-product-name="{{ product.productName|e('html_attr') }}" data-form-id="delete-form-{{ product.id }}">Delete</button>
+                                    </form>
                                 </td>
                             </tr>
-
                         {% endfor %}
-
                     </tbody>
-
                 </table>
-
             </div>
-
         {% endif %}
-
     </div>
-
 </section>
 
+<div class="delete-modal-overlay" id="delete-modal" hidden>
+    <div class="delete-modal">
+        <div class="delete-modal-header">
+            <h3>CONFIRM DELETION</h3>
+            <button type="button" class="modal-close-btn" id="modal-close" aria-label="Close">&times;</button>
+        </div>
+
+        <div class="delete-modal-body">
+            <div class="delete-modal-icon">!</div>
+            <h4>Are you sure?</h4>
+            <p>You are about to delete <strong id="delete-product-name">this product</strong>. This action cannot be undone.</p>
+        </div>
+
+        <div class="delete-modal-footer">
+            <button type="button" class="modal-cancel-btn" id="modal-cancel">Cancel</button>
+            <button type="button" class="modal-delete-btn" id="modal-confirm">Delete Product</button>
+        </div>
+    </div>
+</div>
+
+<script src="{{ asset('js/delete-modal.js') }}" defer></script>
 {% endblock %}

@@ -2,6 +2,13 @@
 
 namespace App\Controller;
 
+use App\Entity\Order;
+use App\Entity\OrderItem;
+use App\Entity\Product;
+use App\Entity\User;
+use App\Repository\OrderRepository;
+use App\Repository\ProductRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -9,17 +16,20 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class CheckoutController extends AbstractController
 {
-    // Display checkout and process orders.
     #[Route('/checkout', name: 'checkout', methods: ['GET', 'POST'])]
-    public function index(Request $request): Response
-    {
-        // Require the customer to be logged in.
-        if (!$this->getUser()) {
+    public function index(
+        Request $request,
+        EntityManagerInterface $entityManager,
+        ProductRepository $productRepository
+    ): Response {
+        // Make sure the customer is logged in.
+        $user = $this->getUser();
+
+        if (!$user instanceof User) {
             return $this->redirectToRoute('login');
         }
 
         $session = $request->getSession();
-
         $cart = $session->get('cart', []);
 
         // Prevent checkout with an empty cart.
@@ -27,30 +37,49 @@ class CheckoutController extends AbstractController
             return $this->redirectToRoute('cart');
         }
 
-        // Get customer information from the session.
-        $email = $session->get('user_email', '');
-
-        $customerName = '';
+        // Default customer information.
+        $customerName = $user->getFullName();
+        $email = $user->getEmail();
         $phone = '';
         $address = '';
         $error = '';
 
-        // Calculate the order summary.
+        // Get the latest product information from MySQL.
         $cartItems = [];
-        $total = 0;
+        $totalCents = 0;
 
-        foreach ($cart as $item) {
-            $item['item_total'] =
-                $item['price'] * $item['quantity'];
+        foreach ($cart as $itemKey => $item) {
+            $product = $productRepository->find((int) $item['id']);
 
-            $total += $item['item_total'];
+            if (!$product) {
+                $error = 'A product in your cart is no longer available.';
+                continue;
+            }
 
-            $cartItems[] = $item;
+            $quantity = (int) $item['quantity'];
+            $priceCents = (int) round((float) $product->getPrice() * 100);
+            $itemTotalCents = $priceCents * $quantity;
+
+            $totalCents += $itemTotalCents;
+
+            $cartItems[] = [
+                'item_key' => $itemKey,
+                'id' => $product->getId(),
+                'name' => $product->getProductName(),
+                'category' => $product->getCategory()->getCategoryname(),
+                'price' => $product->getPrice(),
+                'image' => $product->getImage(),
+                'stock' => $product->getStock(),
+                'size' => $item['size'],
+                'quantity' => $quantity,
+                'item_total' => $itemTotalCents / 100,
+            ];
         }
 
-        // Process Place Order.
-        if ($request->isMethod('POST')) {
+        $total = $totalCents / 100;
 
+        // Process the checkout form.
+        if ($request->isMethod('POST')) {
             $customerName = trim(
                 $request->request->get('customer_name', '')
             );
@@ -67,114 +96,183 @@ class CheckoutController extends AbstractController
                 $request->request->get('address', '')
             );
 
-            // Validate CSRF token.
+            // Validate the submitted form.
             if (!$this->isCsrfTokenValid(
                 'checkout_order',
                 $request->request->get('_token')
             )) {
                 $error = 'Invalid request. Please try again.';
-
             } elseif ($customerName === '') {
                 $error = 'Please enter your full name.';
-
             } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 $error = 'Please enter a valid email address.';
-
             } elseif (!preg_match('/^[0-9+\-\s]{7,20}$/', $phone)) {
                 $error = 'Please enter a valid mobile number.';
-
             } elseif ($address === '') {
                 $error = 'Please enter your delivery address.';
+            }
 
-            } else {
+            if ($error === '') {
+                $connection = $entityManager->getConnection();
 
-                // Check the cart again before creating the order.
-                $latestCart = [];
-                $productQuantities = [];
-                $finalTotal = 0;
+                try {
+                    // Begin a database transaction.
+                    $connection->beginTransaction();
 
-                foreach ($cart as $item) {
+                    $products = [];
+                    $productQuantities = [];
+                    $orderItemsData = [];
+                    $finalTotalCents = 0;
 
-                    $quantity = (int) $item['quantity'];
-                    $stock = (int) $item['stock'];
-                    $productId = (int) $item['id'];
+                    // Validate every item using current database records.
+                    foreach ($cart as $item) {
+                        $productId = (int) $item['id'];
+                        $quantity = (int) $item['quantity'];
+                        $size = trim((string) $item['size']);
 
-                    if ($quantity < 1 || $stock < 0) {
-                        $error = 'Invalid cart item.';
-                        break;
+                        $product = $entityManager->find(
+                            Product::class,
+                            $productId
+                        );
+
+                        if (!$product) {
+                            throw new \RuntimeException(
+                                'A product in your cart is no longer available.'
+                            );
+                        }
+
+                        if ($quantity < 1) {
+                            throw new \RuntimeException(
+                                'Invalid product quantity.'
+                            );
+                        }
+
+                        $availableSizes = $product->getSizes() ?? [];
+
+                        if (!in_array($size, $availableSizes, true)) {
+                            throw new \RuntimeException(
+                                'The selected size for '
+                                . $product->getProductName()
+                                . ' is no longer available.'
+                            );
+                        }
+
+                        $products[$productId] = $product;
+
+                        // Combine quantities for the same product.
+                        $productQuantities[$productId] =
+                            ($productQuantities[$productId] ?? 0)
+                            + $quantity;
+
+                        // Calculate using cents to avoid common decimal errors.
+                        $priceCents = (int) round(
+                            (float) $product->getPrice() * 100
+                        );
+
+                        $finalTotalCents += $priceCents * $quantity;
+
+                        $orderItemsData[] = [
+                            'product' => $product,
+                            'size' => $size,
+                            'quantity' => $quantity,
+                            'price' => $product->getPrice(),
+                        ];
                     }
 
-                    // Add quantities of the same product together.
-                    $productQuantities[$productId] =
-                        ($productQuantities[$productId] ?? 0)
-                        + $quantity;
+                    if (empty($orderItemsData)) {
+                        throw new \RuntimeException(
+                            'Your cart is empty.'
+                        );
+                    }
 
-                    $item['item_total'] =
-                        $item['price'] * $quantity;
+                    // Check the combined quantity against available stock.
+                    foreach ($productQuantities as $productId => $quantity) {
+                        $product = $products[$productId];
 
-                    $finalTotal += $item['item_total'];
-
-                    $latestCart[] = $item;
-                }
-
-                // Check total quantity against available stock.
-                if ($error === '') {
-                    foreach ($latestCart as $item) {
-                        $productId = (int) $item['id'];
-
-                        if (
-                            $productQuantities[$productId]
-                            > (int) $item['stock']
-                        ) {
-                            $error = 'Not enough stock for '
-                                . $item['name'] . '.';
-                            break;
+                        if ($quantity > $product->getStock()) {
+                            throw new \RuntimeException(
+                                'Not enough stock for '
+                                . $product->getProductName()
+                                . '. Available stock: '
+                                . $product->getStock()
+                            );
                         }
                     }
-                }
 
-                if ($error === '' && empty($latestCart)) {
-                    $error = 'Your cart is empty.';
-                }
+                    // Create the main order.
+                    $order = new Order();
 
-                // Create the order if validation succeeds.
-                if ($error === '') {
-
-                    $orderNumber = strtoupper(
-                        bin2hex(random_bytes(4))
+                    $order->setOrderNumber(
+                        strtoupper(bin2hex(random_bytes(4)))
                     );
 
-                    $order = [
-                        'order_number' => $orderNumber,
+                    $order->setUser($user);
+                    $order->setCustomerName($customerName);
+                    $order->setEmail($email);
+                    $order->setPhone($phone);
+                    $order->setAddress($address);
+                    $order->setPaymentMethod('Cash on Delivery');
+                    $order->setTotalAmount(
+                        $this->formatCents($finalTotalCents)
+                    );
+                    $order->setStatus('Pending');
 
-                        // Use the currently logged-in Symfony user.
-                        'user_id' => $this->getUser()->getId(),
+                    // Create an order item for every cart entry.
+                    foreach ($orderItemsData as $itemData) {
+                        $product = $itemData['product'];
 
-                        'customer_name' => $customerName,
-                        'email' => $email,
-                        'phone' => $phone,
-                        'address' => $address,
-                        'payment_method' => 'Cash on Delivery',
-                        'items' => $latestCart,
-                        'total_amount' => $finalTotal,
-                        'status' => 'Pending',
-                        'created_at' => date('Y-m-d H:i:s'),
-                    ];
+                        $orderItem = new OrderItem();
 
-                    // Save the order temporarily in the session.
-                    $orders = $session->get('orders', []);
+                        $orderItem->setProduct($product);
+                        $orderItem->setProductName(
+                            $product->getProductName()
+                        );
+                        $orderItem->setProductImage(
+                            $product->getImage()
+                        );
+                        $orderItem->setSize($itemData['size']);
+                        $orderItem->setQuantity($itemData['quantity']);
+                        $orderItem->setUnitPrice($itemData['price']);
 
-                    $orders[$orderNumber] = $order;
+                        $order->addItem($orderItem);
+                    }
 
-                    $session->set('orders', $orders);
+                    // Deduct the purchased quantities from product stock.
+                    foreach ($productQuantities as $productId => $quantity) {
+                        $product = $products[$productId];
 
-                    // Clear the cart only after saving the order.
+                        $product->setStock(
+                            $product->getStock() - $quantity
+                        );
+                    }
+
+                    // Save the order, its items, and updated stock.
+                    $entityManager->persist($order);
+                    $entityManager->flush();
+
+                    // Commit the transaction after successful saving.
+                    $connection->commit();
+
+                    // Clear the cart only after successful checkout.
                     $session->set('cart', []);
 
                     return $this->redirectToRoute(
                         'checkout_success',
-                        ['orderNumber' => $orderNumber]
+                        [
+                            'orderNumber' => $order->getOrderNumber(),
+                        ]
                     );
+                } catch (\Throwable $exception) {
+                    // Undo database changes if checkout fails.
+                    if ($connection->isTransactionActive()) {
+                        $connection->rollBack();
+                    }
+
+                    if ($exception instanceof \RuntimeException) {
+                        $error = $exception->getMessage();
+                    } else {
+                        $error = 'We could not place your order. Please try again.';
+                    }
                 }
             }
         }
@@ -190,42 +288,52 @@ class CheckoutController extends AbstractController
         ]);
     }
 
-    // Display successful order confirmation.
+    // Display the saved order confirmation.
     #[Route(
         '/checkout/success/{orderNumber}',
         name: 'checkout_success',
         methods: ['GET']
     )]
     public function success(
-        Request $request,
-        string $orderNumber
+        string $orderNumber,
+        OrderRepository $orderRepository
     ): Response {
+        $user = $this->getUser();
 
-        // Require the customer to be logged in.
-        if (!$this->getUser()) {
+        if (!$user instanceof User) {
             return $this->redirectToRoute('login');
         }
 
-        $session = $request->getSession();
+        // Retrieve the order from MySQL.
+        $order = $orderRepository->findOneBy([
+            'orderNumber' => $orderNumber,
+        ]);
 
-        $orders = $session->get('orders', []);
-
-        if (!isset($orders[$orderNumber])) {
+        if (!$order) {
             return $this->redirectToRoute('cart');
         }
 
-        $order = $orders[$orderNumber];
-
-        // Make sure customers can only view their own orders.
-        if (
-            !isset($order['user_id'])
-            || (int) $order['user_id'] !== (int) $this->getUser()->getId()
-        ) {
+        // Prevent customers from viewing another customer's order.
+        if ($order->getUser()->getId() !== $user->getId()) {
             throw $this->createAccessDeniedException();
         }
 
         return $this->render('home/checkout_success.html.twig', [
-            'order' => $order,
+            'order' => [
+                'order_number' => $order->getOrderNumber(),
+                'total_amount' => $order->getTotalAmount(),
+                'payment_method' => $order->getPaymentMethod(),
+                'address' => $order->getAddress(),
+                'status' => $order->getStatus(),
+            ],
         ]);
+    }
+
+    // Convert cents into a decimal amount.
+    private function formatCents(int $cents): string
+    {
+        return intdiv($cents, 100)
+            . '.'
+            . str_pad((string) ($cents % 100), 2, '0', STR_PAD_LEFT);
     }
 }
