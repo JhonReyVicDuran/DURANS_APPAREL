@@ -29,11 +29,10 @@
         <!-- SUCCESS MESSAGE -->
         {% if success %}
             <div class="success-message">
-                Account form validated successfully!
+                Your account has been created successfully!
 
                 <small>
-                    This is a frontend demonstration.
-                    Your account has not been saved yet.
+                    You can now log in to your DURAN'S Apparel account.
                 </small>
             </div>
         {% endif %}
@@ -52,6 +51,13 @@
             action="{{ path('signup') }}"
             method="POST"
         >
+
+            <!-- CSRF PROTECTION -->
+            <input
+                type="hidden"
+                name="_csrf_token"
+                value="{{ csrf_token('signup') }}"
+            >
 
             <!-- FULL NAME -->
             <div class="form-group">
@@ -179,7 +185,7 @@
 
             Already have an account?
 
-            <a href="/login">
+            <a href="{{ path('login') }}">
                 Log in
             </a>
 

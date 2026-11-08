@@ -159,22 +159,3 @@ if (clearCartButton) {
     });
 
 }
-
-
-/* =====================================================
-   CHECKOUT PLACEHOLDER
-===================================================== */
-
-const checkoutButton = document.querySelector("[data-checkout]");
-
-if (checkoutButton) {
-
-    checkoutButton.addEventListener("click", function () {
-
-        showCartNotification(
-            "Checkout is not available yet. The order system still needs to be connected."
-        );
-
-    });
-
-}

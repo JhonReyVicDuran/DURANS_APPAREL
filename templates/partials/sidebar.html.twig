@@ -1,4 +1,3 @@
-
 <aside class="sidebar">
 
     {# BRAND #}
@@ -7,56 +6,44 @@
         <span>APPAREL ADMIN</span>
     </div>
 
-
     {# MAIN NAVIGATION #}
     <nav class="sidebar-menu">
 
         {# DASHBOARD #}
         <a href="{{ path('admin_dashboard') }}"
            class="menu-item {% if app.request.attributes.get('_route') == 'admin_dashboard' %}active{% endif %}">
-
             <span class="menu-icon">▣</span>
             <span>Dashboard</span>
-
         </a>
-
 
         {# PRODUCTS #}
         <a href="{{ path('admin_products') }}"
            class="menu-item {% if app.request.attributes.get('_route') == 'admin_products' %}active{% endif %}">
-
             <span class="menu-icon">◆</span>
             <span>Products</span>
-
         </a>
-
 
         {# ORDERS #}
         <a href="{{ path('admin_orders') }}"
            class="menu-item {% if app.request.attributes.get('_route') == 'admin_orders' or app.request.attributes.get('_route') == 'admin_order_update_status' %}active{% endif %}">
-
             <span class="menu-icon">▤</span>
             <span>Orders</span>
-
         </a>
 
-
         {# VIEW WEBSITE #}
-        <a href="#"
-           class="menu-item">
-
+        <a href="{{ path('app_home') }}" class="menu-item">
             <span class="menu-icon">↗</span>
             <span>View Website</span>
-
         </a>
 
     </nav>
 
-
     {# BOTTOM NAVIGATION #}
     <div class="sidebar-bottom">
 
-        <a href="#" class="menu-item logout">
+        <a href="{{ path('app_logout') }}"
+           class="menu-item logout"
+           onclick="openLogoutPopup(event)">
 
             <span class="menu-icon">↪</span>
             <span>Logout</span>

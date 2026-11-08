@@ -23,6 +23,12 @@
             </p>
         </div>
 
+        {% for message in app.flashes('success') %}
+        <div class="success-message">
+            {{ message }}
+        </div>
+            {% endfor %}
+
         {% if error is not empty %}
             <div class="error-message">
                 {{ error }}
@@ -35,6 +41,13 @@
             action="{{ path('login') }}"
             method="POST"
         >
+
+            {# Symfony CSRF protection #}
+            <input
+                type="hidden"
+                name="_csrf_token"
+                value="{{ csrf_token('authenticate') }}"
+            >
 
             <div class="form-group">
                 <label for="email">

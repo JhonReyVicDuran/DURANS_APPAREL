@@ -11,6 +11,7 @@
     </title>
 
     <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/logout.css') }}">
 
     {% block stylesheets %}{% endblock %}
 
@@ -22,13 +23,19 @@
 
         {% include 'partials/sidebar.html.twig' %}
 
-        <main class="admin-content">
+        <main class="main-content">
 
             {% block body %}{% endblock %}
 
         </main>
 
     </div>
+
+    {# LOGOUT POPUP #}
+    {% include 'partials/logout_popup.html.twig' %}
+
+    {# LOGOUT JAVASCRIPT #}
+    <script src="{{ asset('js/logout.js') }}"></script>
 
     {% block javascripts %}{% endblock %}
 

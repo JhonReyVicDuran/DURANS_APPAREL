@@ -1,0 +1,72 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Order Placed | DURAN'S Apparel{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/checkout.css') }}">
+{% endblock %}
+
+{% block body %}
+
+<main class="success-page">
+
+    <div class="success-icon">
+        &#10003;
+    </div>
+
+    <h1>Order Placed!</h1>
+
+    <p class="success-message">
+        Thank you for your order from DURAN'S Apparel.
+        Your order has been successfully placed.
+    </p>
+
+    <div class="success-details">
+
+        <p>
+            <strong>Order Number:</strong>
+            #{{ order.order_number }}
+        </p>
+
+        <p>
+            <strong>Total Amount:</strong>
+            ₱{{ order.total_amount|number_format(2, '.', ',') }}
+        </p>
+
+        <p>
+            <strong>Payment Method:</strong>
+            {{ order.payment_method }}
+        </p>
+
+        <p>
+            <strong>Delivery Address:</strong>
+            {{ order.address }}
+        </p>
+
+        <p>
+            <strong>Status:</strong>
+            {{ order.status }}
+        </p>
+
+    </div>
+
+    <p class="success-reminder">
+        Please prepare your payment when your order arrives.
+    </p>
+
+    <div class="success-buttons">
+
+    <a href="{{ path('collections') }}" class="home-btn">
+        CONTINUE SHOPPING
+    </a>
+
+    <a href="{{ path('track_orders') }}" class="orders-btn">
+        VIEW MY ORDERS
+    </a>
+
+</div>
+
+</main>
+
+{% endblock %}

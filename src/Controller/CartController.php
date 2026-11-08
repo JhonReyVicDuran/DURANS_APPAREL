@@ -11,7 +11,6 @@ use Symfony\Component\Routing\Attribute\Route;
 class CartController extends AbstractController
 {
     // Temporary product catalog.
-    // These details should match CollectionController.
     private function getProducts(): array
     {
         return [
@@ -20,7 +19,7 @@ class CartController extends AbstractController
                 'name' => 'Classic Black Shirt',
                 'category' => 'T-Shirt',
                 'price' => 499.00,
-                'image' => null,
+                'image' => 'admin/images/tshirt.png',
                 'stock' => 15,
                 'sizes' => ['S', 'M', 'L', 'XL'],
             ],
@@ -29,7 +28,7 @@ class CartController extends AbstractController
                 'name' => 'Essential White Shirt',
                 'category' => 'T-Shirt',
                 'price' => 450.00,
-                'image' => null,
+                'image' => 'admin/images/tshirt.png',
                 'stock' => 12,
                 'sizes' => ['XS', 'S', 'M', 'L', 'XL'],
             ],
@@ -38,7 +37,7 @@ class CartController extends AbstractController
                 'name' => 'Premium Black Hoodie',
                 'category' => 'Hoodie',
                 'price' => 899.00,
-                'image' => null,
+                'image' => 'admin/images/hoodie.png',
                 'stock' => 8,
                 'sizes' => ['M', 'L', 'XL', 'XXL'],
             ],
@@ -47,7 +46,7 @@ class CartController extends AbstractController
                 'name' => 'Classic Training Shorts',
                 'category' => 'Shorts',
                 'price' => 599.00,
-                'image' => null,
+                'image' => 'admin/images/shorts.png',
                 'stock' => 0,
                 'sizes' => ['S', 'M', 'L'],
             ],
@@ -56,7 +55,7 @@ class CartController extends AbstractController
                 'name' => 'Compression Shirt',
                 'category' => 'Compression Wear',
                 'price' => 699.00,
-                'image' => null,
+                'image' => 'admin/images/compression.png',
                 'stock' => 10,
                 'sizes' => ['S', 'M', 'L', 'XL'],
             ],
@@ -65,24 +64,24 @@ class CartController extends AbstractController
                 'name' => 'Essential Cap',
                 'category' => 'Accessories',
                 'price' => 299.00,
-                'image' => null,
+                'image' => 'admin/images/cap.png',
                 'stock' => 20,
                 'sizes' => ['ONE SIZE'],
             ],
         ];
     }
 
-    // Check whether the customer has a login session.
-    private function isLoggedIn(Request $request): bool
+    // Check Symfony authentication.
+    private function isLoggedIn(): bool
     {
-        return $request->getSession()->has('user_id');
+        return $this->getUser() !== null;
     }
 
-    // Display the shopping cart.
+    // Display shopping cart.
     #[Route('/cart', name: 'cart', methods: ['GET'])]
     public function index(Request $request): Response
     {
-        if (!$this->isLoggedIn($request)) {
+        if (!$this->isLoggedIn()) {
             return $this->redirectToRoute('login');
         }
 
@@ -108,12 +107,11 @@ class CartController extends AbstractController
         ]);
     }
 
-    // Add a product to the cart.
+    // Add product to cart.
     #[Route('/cart/add/{id}', name: 'cart_add', methods: ['POST'])]
     public function add(Request $request, int $id): JsonResponse
     {
-        // Require login first.
-        if (!$this->isLoggedIn($request)) {
+        if (!$this->isLoggedIn()) {
             return $this->json([
                 'success' => false,
                 'login_required' => true,
@@ -172,7 +170,6 @@ class CartController extends AbstractController
         $session = $request->getSession();
         $cart = $session->get('cart', []);
 
-        // Different sizes create separate cart entries.
         $itemKey = $id . '_' . $size;
 
         $existingQuantity = $cart[$itemKey]['quantity'] ?? 0;
@@ -210,11 +207,11 @@ class CartController extends AbstractController
         ]);
     }
 
-    // Update the quantity of a cart item.
+    // Update cart quantity.
     #[Route('/cart/update', name: 'cart_update', methods: ['POST'])]
     public function update(Request $request): JsonResponse
     {
-        if (!$this->isLoggedIn($request)) {
+        if (!$this->isLoggedIn()) {
             return $this->json([
                 'success' => false,
                 'login_required' => true,
@@ -265,11 +262,11 @@ class CartController extends AbstractController
         ]);
     }
 
-    // Remove an item from the cart.
+    // Remove cart item.
     #[Route('/cart/remove', name: 'cart_remove', methods: ['POST'])]
     public function remove(Request $request): JsonResponse
     {
-        if (!$this->isLoggedIn($request)) {
+        if (!$this->isLoggedIn()) {
             return $this->json([
                 'success' => false,
                 'login_required' => true,
@@ -300,11 +297,11 @@ class CartController extends AbstractController
         ]);
     }
 
-    // Clear all cart items.
+    // Clear cart.
     #[Route('/cart/clear', name: 'cart_clear', methods: ['POST'])]
     public function clear(Request $request): JsonResponse
     {
-        if (!$this->isLoggedIn($request)) {
+        if (!$this->isLoggedIn()) {
             return $this->json([
                 'success' => false,
                 'login_required' => true,

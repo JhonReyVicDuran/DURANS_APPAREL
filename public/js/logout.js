@@ -1,15 +1,19 @@
 function openLogoutPopup(event) {
     event.preventDefault();
 
-    document
-        .getElementById("logoutOverlay")
-        .classList.add("active");
+    const overlay = document.getElementById("logoutOverlay");
+
+    if (overlay) {
+        overlay.classList.add("active");
+    }
 }
 
 function closeLogoutPopup() {
-    document
-        .getElementById("logoutOverlay")
-        .classList.remove("active");
+    const overlay = document.getElementById("logoutOverlay");
+
+    if (overlay) {
+        overlay.classList.remove("active");
+    }
 }
 
 function confirmLogout() {

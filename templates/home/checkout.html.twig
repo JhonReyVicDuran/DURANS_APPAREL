@@ -1,0 +1,155 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Checkout | DURAN'S Apparel{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/checkout.css') }}">
+{% endblock %}
+
+{% block body %}
+
+<main class="checkout-container">
+
+    <a href="{{ path('cart') }}" class="back-cart-btn">
+        &larr; Back to Cart
+    </a>
+
+    <div class="checkout-title">
+        <h1>Checkout</h1>
+        <p>Complete your order details</p>
+    </div>
+
+    {% if error %}
+        <div class="checkout-error">
+            {{ error }}
+        </div>
+    {% endif %}
+
+    <div class="checkout-layout">
+
+        <!-- DELIVERY INFORMATION -->
+        <section class="checkout-box">
+
+            <h2>Delivery Information</h2>
+
+            <form method="POST" action="{{ path('checkout') }}">
+
+                <input
+                    type="hidden"
+                    name="_token"
+                    value="{{ csrf_token('checkout_order') }}"
+                >
+
+                <div class="checkout-field">
+                    <label for="customer_name">Full Name</label>
+                    <input
+                        type="text"
+                        id="customer_name"
+                        name="customer_name"
+                        value="{{ customerName }}"
+                        placeholder="Enter your full name"
+                        required
+                    >
+                </div>
+
+                <div class="checkout-field">
+                    <label for="email">Email</label>
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        value="{{ email }}"
+                        placeholder="Enter your email"
+                        required
+                    >
+                </div>
+
+                <div class="checkout-field">
+                    <label for="phone">Mobile Number</label>
+                    <input
+                        type="tel"
+                        id="phone"
+                        name="phone"
+                        value="{{ phone }}"
+                        placeholder="09XXXXXXXXX"
+                        maxlength="20"
+                        required
+                    >
+                </div>
+
+                <div class="checkout-field">
+                    <label>Payment Method</label>
+
+                    <div class="payment-box">
+                        <strong>Cash on Delivery</strong>
+                        <span>
+                            Pay the total amount when your order is delivered.
+                        </span>
+                    </div>
+                </div>
+
+                <div class="checkout-field">
+                    <label for="address">Delivery Address</label>
+                    <textarea
+                        id="address"
+                        name="address"
+                        placeholder="Enter your complete delivery address"
+                        required
+                    >{{ address }}</textarea>
+                </div>
+
+                <button type="submit" class="place-order-btn">
+                    PLACE ORDER
+                </button>
+
+            </form>
+
+        </section>
+
+        <!-- ORDER SUMMARY -->
+        <section class="checkout-box">
+
+            <h2>Order Summary</h2>
+
+            {% for item in cartItems %}
+
+                <div class="summary-item">
+
+                    <div class="summary-item-info">
+
+                        <div class="summary-item-name">
+                            {{ item.name }}
+                        </div>
+
+                        <div class="summary-item-details">
+                            Size: {{ item.size }}<br>
+                            Quantity: {{ item.quantity }}
+                        </div>
+
+                    </div>
+
+                    <div class="summary-item-price">
+                        ₱{{ item.item_total|number_format(2, '.', ',') }}
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+            <div class="summary-total">
+                <span>Total</span>
+                <span>₱{{ total|number_format(2, '.', ',') }}</span>
+            </div>
+
+            <p class="checkout-note">
+                Please review your order details before placing your order.
+            </p>
+
+        </section>
+
+    </div>
+
+</main>
+
+{% endblock %}

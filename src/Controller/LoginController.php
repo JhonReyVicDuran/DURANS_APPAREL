@@ -3,46 +3,36 @@
 namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class LoginController extends AbstractController
 {
     #[Route('/login', name: 'login', methods: ['GET', 'POST'])]
-    public function index(Request $request): Response
-    {
-        $error = '';
-        $email = '';
+    public function index(
+        AuthenticationUtils $authenticationUtils
+    ): Response {
 
-        if ($request->isMethod('POST')) {
-            $email = trim($request->request->get('email', ''));
-            $password = $request->request->get('password', '');
-
-            if ($email === '' || $password === '') {
-                $error = 'Please enter your email/username and password.';
-            } else {
-
-                // TEMPORARY LOGIN SESSION
-                $session = $request->getSession();
-
-                $temporaryUserId = 'TEMP-' . substr(
-                    hash('sha256', strtolower($email)),
-                    0,
-                    12
-                );
-
-                $session->set('user_id', $temporaryUserId);
-                $session->set('user_email', $email);
-
-                // Redirect after successful temporary login
-                return $this->redirectToRoute('collections');
+        // If the user is already logged in, redirect them.
+        if ($this->getUser()) {
+            if ($this->isGranted('ROLE_ADMIN')) {
+                return $this->redirectToRoute('admin_dashboard');
             }
+
+            return $this->redirectToRoute('app_home');
         }
 
+        // Get the last login error, if authentication failed.
+        $error = $authenticationUtils->getLastAuthenticationError();
+
+        // Get the email entered during the previous login attempt.
+        $lastEmail = $authenticationUtils->getLastUsername();
+
         return $this->render('home/login.html.twig', [
-            'error' => $error,
-            'email' => $email,
+            'error' => $error ? $error->getMessage() : '',
+            'email' => $lastEmail,
         ]);
     }
 }

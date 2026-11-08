@@ -1,0 +1,233 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}My Orders | DURAN'S Apparel{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/orders.css') }}">
+{% endblock %}
+
+{% block body %}
+
+<main class="track-container">
+
+    <div class="track-title">
+        <h1>My Orders</h1>
+        <p>View and track all of your orders.</p>
+    </div>
+
+    {% if orders is empty %}
+
+        <!-- NO ORDERS -->
+        <section class="no-orders">
+
+            <div class="no-orders-icon">
+                <span>📦</span>
+            </div>
+
+            <h2>No Orders Yet</h2>
+
+            <p>
+                You haven't placed any orders yet.
+                Explore our collections and find something you like.
+            </p>
+
+            <a href="{{ path('collections') }}" class="shop-btn">
+                SHOP NOW
+            </a>
+
+        </section>
+
+    {% else %}
+
+        {% for order in orders %}
+
+            <article class="order-card">
+
+                <!-- ORDER HEADER -->
+                <div class="order-header">
+
+                    <div class="order-number">
+
+                        <h2>
+                            Order #{{ order.order_number }}
+                        </h2>
+
+                        <p>
+                            Ordered on
+                            {{ order.created_at|date('F d, Y h:i A') }}
+                        </p>
+
+                    </div>
+
+                    <span class="status {{ order.status|lower }}">
+                        {{ order.status }}
+                    </span>
+
+                </div>
+
+                <!-- ORDER TIMELINE -->
+                {% if order.status != 'Cancelled' %}
+
+                    <div class="timeline">
+
+                        {% for step in steps %}
+
+                            <div class="timeline-step
+                                {% if loop.index0 < order.current_step %}
+                                    completed
+                                {% elseif loop.index0 == order.current_step %}
+                                    active
+                                {% endif %}
+                            ">
+
+                                <div class="timeline-circle"></div>
+
+                                <p>{{ step }}</p>
+
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+                {% else %}
+
+                    <div class="cancelled-message">
+                        This order has been cancelled.
+                    </div>
+
+                {% endif %}
+
+                <!-- ORDERED ITEMS -->
+                <h3 class="items-title">
+                    Items Ordered
+                </h3>
+
+                <div class="order-items">
+
+                    {% for item in order.items %}
+
+                        <div class="order-item">
+
+                            <!-- PRODUCT IMAGE -->
+                            <div class="item-image">
+
+                                {% if item.image %}
+                                    <img
+                                        src="{{ asset(item.image) }}"
+                                        alt="{{ item.name }}"
+                                    >
+                                {% else %}
+                                    <div class="item-image-placeholder">
+                                        <span>DURAN'S</span>
+                                        <small>APPAREL</small>
+                                    </div>
+                                {% endif %}
+
+                            </div>
+
+                            <!-- PRODUCT INFORMATION -->
+                            <div class="item-info">
+
+                                <h3>{{ item.name }}</h3>
+
+                                <p>
+                                    Quantity:
+                                    <strong>{{ item.quantity }}</strong>
+                                </p>
+
+                                <p class="item-size">
+                                    Size:
+                                    <strong>{{ item.size }}</strong>
+                                </p>
+
+                                <p>
+                                    Price:
+                                    ₱{{ item.price|number_format(2, '.', ',') }}
+                                </p>
+
+                            </div>
+
+                            <!-- ITEM SUBTOTAL -->
+                            <div class="item-price">
+
+                                <div class="price">
+                                    Subtotal
+                                </div>
+
+                                <div class="subtotal">
+                                    ₱{{ item.subtotal|number_format(2, '.', ',') }}
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+                <!-- CUSTOMER AND DELIVERY INFORMATION -->
+                <div class="order-details">
+
+                    <div class="details-box">
+
+                        <h3>Customer Information</h3>
+
+                        <p>
+                            <strong>Name:</strong>
+                            {{ order.customer_name }}
+                            <br>
+
+                            <strong>Email:</strong>
+                            {{ order.email }}
+                            <br>
+
+                            <strong>Phone:</strong>
+                            {{ order.phone }}
+                        </p>
+
+                    </div>
+
+                    <div class="details-box">
+
+                        <h3>Delivery Address</h3>
+
+                        <p>
+                            {{ order.address|nl2br }}
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <!-- PAYMENT INFORMATION -->
+                <div class="payment-information">
+
+                    <span>Payment Method</span>
+
+                    <strong>{{ order.payment_method }}</strong>
+
+                </div>
+
+                <!-- ORDER TOTAL -->
+                <div class="order-total">
+
+                    <span>Total Amount:</span>
+
+                    <strong>
+                        ₱{{ order.total_amount|number_format(2, '.', ',') }}
+                    </strong>
+
+                </div>
+
+            </article>
+
+        {% endfor %}
+
+    {% endif %}
+
+</main>
+
+{% endblock %}

@@ -34,22 +34,60 @@
 
     </section>
 
-
     <!-- PRODUCTS SECTION -->
     <section class="collection-page">
 
         <div class="collection-heading">
             <h2>DISCOVER OUR COLLECTIONS</h2>
-        </div>
 
+            <!-- CATEGORY FILTER -->
+            <form
+                method="GET"
+                action="{{ path('collections') }}"
+                class="category-filter"
+            >
+
+                <label for="category-filter">
+                    FILTER BY CATEGORY
+                </label>
+
+                <select
+                    name="category"
+                    id="category-filter"
+                    onchange="this.form.submit()"
+                >
+
+                    <option value="">
+                        All Products
+                    </option>
+
+                    {% for category in categories %}
+
+                        <option
+                            value="{{ category.id }}"
+                            {% if selectedCategoryId == category.id %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ category.categoryname }}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </form>
+        </div>
 
         <!-- PRODUCT GRID -->
         <div class="collection-grid">
 
             {% for product in products %}
 
-                <div class="collection-card"
-                     data-product-id="{{ product.id }}">
+                <div
+                    class="collection-card"
+                    data-product-id="{{ product.id }}"
+                >
 
                     <!-- PRODUCT IMAGE -->
                     <div class="collection-image">
@@ -62,7 +100,7 @@
 
                             <img
                                 src="{{ asset(product.image) }}"
-                                alt="{{ product.name }}"
+                                alt="{{ product.productName }}"
                             >
 
                         {% else %}
@@ -71,7 +109,9 @@
 
                                 <span>DURAN'S APPAREL</span>
 
-                                <small>{{ product.category }}</small>
+                                <small>
+                                    {{ product.category.categoryname }}
+                                </small>
 
                             </div>
 
@@ -79,16 +119,14 @@
 
                     </div>
 
-
                     <!-- PRODUCT INFORMATION -->
                     <div class="product-info">
 
-                        <h3>{{ product.name }}</h3>
+                        <h3>{{ product.productName }}</h3>
 
                         <p class="product-type">
-                            {{ product.category }}
+                            {{ product.category.categoryname }}
                         </p>
-
 
                         <!-- PRICE AND STOCK -->
                         <div class="product-bottom">
@@ -102,7 +140,6 @@
                             </span>
 
                         </div>
-
 
                         <!-- PRODUCT ACTIONS -->
                         <div class="product-actions">
@@ -122,13 +159,19 @@
                                     >
 
                                         <option value="">
-                                            Select
+                                            Select Size
                                         </option>
 
-                                        {% for size in product.sizes %}
+                                        {% for size in product.sizes|default([]) %}
 
                                             <option value="{{ size }}">
                                                 {{ size }}
+                                            </option>
+
+                                        {% else %}
+
+                                            <option value="" disabled>
+                                                No sizes configured
                                             </option>
 
                                         {% endfor %}
@@ -136,7 +179,6 @@
                                     </select>
 
                                 </div>
-
 
                                 <!-- QUANTITY SELECTOR -->
                                 <div class="quantity-selector">
@@ -176,7 +218,6 @@
 
                                 </div>
 
-
                                 <!-- ADD TO CART -->
                                 <button
                                     type="button"
@@ -185,12 +226,10 @@
                                     onclick="addToCart({{ product.id }})"
                                 >
                                     ADD TO CART 🛒
-                                </button>   
-
+                                </button>
 
                             {% else %}
 
-                                <!-- OUT OF STOCK -->
                                 <button
                                     type="button"
                                     class="add-cart out-of-stock"
@@ -210,7 +249,7 @@
             {% else %}
 
                 <p class="no-products">
-                    No products available.
+                    No products available in this category.
                 </p>
 
             {% endfor %}
@@ -221,7 +260,6 @@
 
 </main>
 
-
 <!-- CART NOTIFICATION -->
 <div
     class="cart-notification"
@@ -231,7 +269,6 @@
 ></div>
 
 {% endblock %}
-
 
 {% block javascripts %}
 
