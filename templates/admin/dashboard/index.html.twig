@@ -1,0 +1,149 @@
+{% extends 'admin_base.html.twig' %}
+
+{% block title %}Admin Dashboard - DURAN'S Apparel{% endblock %}
+
+{% block body %}
+
+    <section class="dashboard-header">
+        <div>
+            <h2>Admin Dashboard</h2>
+            <p>Monitor your store, manage accounts, and track system activities.</p>
+        </div>
+
+        <div class="dashboard-date">
+            {{ "now"|date("F d, Y", "Asia/Manila") }}
+        </div>
+    </section>
+
+    {# ACCOUNT STATISTICS #}
+    <section class="dashboard-stats">
+
+        <div class="dashboard-stat-card">
+            <div class="dashboard-stat-icon">C</div>
+            <div class="dashboard-stat-info">
+                <span>TOTAL CUSTOMERS</span>
+                <strong>{{ total_customers }}</strong>
+            </div>
+        </div>
+
+        <div class="dashboard-stat-card">
+            <div class="dashboard-stat-icon">S</div>
+            <div class="dashboard-stat-info">
+                <span>TOTAL STAFF</span>
+                <strong>{{ total_staff }}</strong>
+            </div>
+        </div>
+
+        <div class="dashboard-stat-card">
+            <div class="dashboard-stat-icon">A</div>
+            <div class="dashboard-stat-info">
+                <span>ACTIVE STAFF</span>
+                <strong>{{ active_staff }}</strong>
+            </div>
+        </div>
+
+        <div class="dashboard-stat-card">
+            <div class="dashboard-stat-icon">I</div>
+            <div class="dashboard-stat-info">
+                <span>INACTIVE STAFF</span>
+                <strong>{{ inactive_staff }}</strong>
+            </div>
+        </div>
+
+    </section>
+
+    {# STORE STATISTICS #}
+    <section class="dashboard-stats">
+
+        <div class="dashboard-stat-card">
+            <div class="dashboard-stat-icon">P</div>
+            <div class="dashboard-stat-info">
+                <span>TOTAL PRODUCTS</span>
+                <strong>{{ total_products }}</strong>
+            </div>
+        </div>
+
+        <div class="dashboard-stat-card">
+            <div class="dashboard-stat-icon">O</div>
+            <div class="dashboard-stat-info">
+                <span>TOTAL ORDERS</span>
+                <strong>{{ total_orders }}</strong>
+            </div>
+        </div>
+
+        <div class="dashboard-stat-card">
+            <div class="dashboard-stat-icon">₱</div>
+            <div class="dashboard-stat-info">
+                <span>TOTAL SALES</span>
+                <strong>₱{{ total_sales|number_format(2, '.', ',') }}</strong>
+            </div>
+        </div>
+
+    </section>
+
+    {# RECENT SYSTEM ACTIVITIES #}
+    <section class="dashboard-panels">
+
+        <div class="dashboard-panel">
+
+            <div class="dashboard-panel-header">
+                <h3>Recent System Activities</h3>
+                <span>Latest 8 records</span>
+            </div>
+
+            <div class="dashboard-panel-content">
+
+                <div class="dashboard-table-wrapper">
+                    <table class="dashboard-table">
+                        <thead>
+                            <tr>
+                                <th>ACCOUNT</th>
+                                <th>ACTION</th>
+                                <th>MODULE</th>
+                                <th>DESCRIPTION</th>
+                                <th>DATE</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for activity in recent_activities %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ activity.actorName ?? 'Deleted account' }}</strong>
+                                    </td>
+
+                                    <td>
+                                        <span class="dashboard-status {{ activity.action|lower }}">
+                                            {{ activity.action }}
+                                        </span>
+                                    </td>
+
+                                    <td>{{ activity.module }}</td>
+                                    <td>{{ activity.description }}</td>
+
+                                    <td>
+                                        {{ activity.createdAt|date('M d, Y - h:i A', 'Asia/Manila') }}
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="5" class="dashboard-empty">
+                                        No system activities recorded yet.
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <a href="{{ path('admin_activity_logs') }}" class="dashboard-view-all">
+                    VIEW ALL ACTIVITIES →
+                </a>
+
+            </div>
+
+        </div>
+
+    </section>
+
+{% endblock %}

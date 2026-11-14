@@ -1,0 +1,99 @@
+{% extends 'admin_base.html.twig' %}
+
+{% block title %}Edit Staff Account - DURAN'S Apparel{% endblock %}
+
+{% block body %}
+
+<section class="content-section">
+
+    <div class="section-heading">
+        <h2>STAFF ACCOUNTS</h2>
+        <p>Edit Staff account information</p>
+    </div>
+
+    <div class="product-panel">
+
+        <h3>EDIT STAFF ACCOUNT</h3>
+
+        <p style="color: #777; font-size: 13px; margin-bottom: 25px;">
+            Update the information for {{ staff.fullName }}.
+        </p>
+
+        {{ form_start(form) }}
+
+            <div class="form-group full-width">
+                {{ form_label(form.fullName) }}
+
+                {{ form_widget(form.fullName, {
+                    attr: {
+                        placeholder: 'Enter staff full name'
+                    }
+                }) }}
+
+                {{ form_errors(form.fullName) }}
+            </div>
+
+            <div class="form-group full-width">
+                {{ form_label(form.email) }}
+
+                {{ form_widget(form.email, {
+                    attr: {
+                        placeholder: 'Enter staff email address'
+                    }
+                }) }}
+
+                {{ form_errors(form.email) }}
+            </div>
+
+            <div style="margin: 25px 0 20px; padding: 15px; background: #f5f5f5; border: 1px solid #ddd;">
+                <strong style="font-size: 13px;">CHANGE PASSWORD</strong>
+
+                <p style="margin: 7px 0 0; color: #777; font-size: 12px;">
+                    Leave both password fields empty if you want to keep the current password.
+                </p>
+            </div>
+
+            <div class="form-group full-width">
+                {{ form_label(form.plainPassword.first) }}
+
+                {{ form_widget(form.plainPassword.first, {
+                    attr: {
+                        placeholder: 'Enter new password (optional)'
+                    }
+                }) }}
+
+                {{ form_errors(form.plainPassword.first) }}
+            </div>
+
+            <div class="form-group full-width">
+                {{ form_label(form.plainPassword.second) }}
+
+                {{ form_widget(form.plainPassword.second, {
+                    attr: {
+                        placeholder: 'Confirm new password'
+                    }
+                }) }}
+
+                {{ form_errors(form.plainPassword.second) }}
+                {{ form_errors(form.plainPassword) }}
+            </div>
+
+            <div class="form-actions edit-form-actions">
+
+                <a href="{{ path('admin_staff_index') }}" class="cancel-edit-btn">
+                    CANCEL
+                </a>
+
+                <button type="submit" class="add-product-btn">
+                    SAVE CHANGES
+                </button>
+
+            </div>
+
+        {{ form_end(form) }}
+
+    </div>
+
+</section>
+
+{% endblock %}

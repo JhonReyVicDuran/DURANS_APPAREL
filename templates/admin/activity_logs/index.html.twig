@@ -1,0 +1,85 @@
+{% extends 'admin_base.html.twig' %}
+
+{% block title %}Activity Logs - DURAN'S Apparel Admin{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/activity_logs.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="activity-page">
+
+    <div class="activity-header">
+        <div>
+            <h2>Activity Logs</h2>
+            <p>Monitor actions performed by Admin and Staff accounts.</p>
+        </div>
+
+        <div class="activity-count">
+            <span>RECENT ACTIVITIES</span>
+            <strong>{{ activities|length }}</strong>
+        </div>
+    </div>
+
+    <section class="activity-panel">
+
+        <div class="activity-panel-header">
+            <h3>System Activity History</h3>
+            <span>Latest 100 records</span>
+        </div>
+
+        <div class="activity-table-wrapper">
+            <table class="activity-table">
+                <thead>
+                    <tr>
+                        <th>ACCOUNT</th>
+                        <th>ACTION</th>
+                        <th>MODULE</th>
+                        <th>DESCRIPTION</th>
+                        <th>DATE & TIME</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for activity in activities %}
+                        <tr>
+                            <td>
+                                <div class="activity-account">
+                                    <strong>{{ activity.actorName ?? 'Deleted account' }}</strong>
+                                    <span>{{ activity.actorEmail ?? 'Account no longer available' }}</span>
+                                </div>
+                            </td>
+
+                            <td>
+                                <span class="activity-badge {{ activity.action|lower }}">
+                                    {{ activity.action }}
+                                </span>
+                            </td>
+
+                            <td>{{ activity.module }}</td>
+
+                            <td class="activity-description">
+                                {{ activity.description }}
+                            </td>
+
+                            <td class="activity-date">
+                                {{ activity.createdAt|date('M d, Y - h:i A') }}
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="5" class="activity-empty">
+                                <strong>No activities recorded yet</strong>
+                                <p>System actions will appear here when Admin or Staff perform them.</p>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </section>
+
+</div>
+{% endblock %}

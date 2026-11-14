@@ -10,11 +10,14 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class DashboardController extends AbstractController
 {
-    #[Route('/admin/dashboard', name: 'admin_dashboard')]
+    #[Route('/staff/dashboard', name: 'staff_dashboard')]
     public function index(
         ProductRepository $productRepository,
         OrderRepository $orderRepository
     ): Response {
+        // Only Staff accounts can access this dashboard.
+        $this->denyAccessUnlessGranted('ROLE_STAFF');
+
         // Count all products.
         $totalProducts = $productRepository->count([]);
 

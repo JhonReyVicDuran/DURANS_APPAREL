@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Order;
 use App\Repository\OrderRepository;
+use App\Service\ActivityLogger;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -12,15 +13,28 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class OrdersController extends AbstractController
 {
+    private function denyUnauthorizedOrderAccess(): void
+    {
+        if (
+            !$this->isGranted('ROLE_ADMIN')
+            && !$this->isGranted('ROLE_STAFF')
+        ) {
+            throw $this->createAccessDeniedException(
+                'You do not have permission to access this page.'
+            );
+        }
+    }
+
     #[Route('/admin/orders', name: 'admin_orders', methods: ['GET', 'POST'])]
     public function index(
         Request $request,
         OrderRepository $orderRepository,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        ActivityLogger $activityLogger
     ): Response {
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        $this->denyUnauthorizedOrderAccess();
 
-        // Process an admin's order status update.
+        // Process an Admin's or Staff member's order status update.
         if ($request->isMethod('POST')) {
             $orderId = $request->request->getInt('order_id');
             $newStatus = $request->request->get('status');
@@ -45,9 +59,30 @@ class OrdersController extends AbstractController
             } elseif (!in_array($newStatus, $allowedStatuses, true)) {
                 $this->addFlash('error', 'Invalid order status.');
             } else {
+                // Save the previous status before changing it.
+                $oldStatus = $order->getStatus();
+
                 $order->setStatus($newStatus);
 
                 $entityManager->flush();
+
+                // Record activity only when the status actually changes.
+                if ($oldStatus !== $newStatus) {
+                    $activityLogger->log(
+                        'UPDATE',
+                        'Orders',
+                        'Updated order #' . $order->getOrderNumber()
+                            . ' status from ' . $oldStatus
+                            . ' to ' . $newStatus . '.',
+                        $order->getId(),
+                        [
+                            'status' => $oldStatus,
+                        ],
+                        [
+                            'status' => $newStatus,
+                        ]
+                    );
+                }
 
                 $this->addFlash(
                     'success',

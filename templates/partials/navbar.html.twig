@@ -1,4 +1,4 @@
-s<header class="navbar">
+<header class="navbar">
 
     <!-- LOGO -->
     <div class="logo">
@@ -44,6 +44,12 @@ s<header class="navbar">
 
                 <a href="{{ path('admin_dashboard') }}" class="login">
                     ADMIN DASHBOARD
+                </a>
+
+            {% elseif is_granted('ROLE_STAFF') %}
+
+                <a href="{{ path('staff_dashboard') }}" class="login">
+                    STAFF DASHBOARD
                 </a>
 
             {% else %}

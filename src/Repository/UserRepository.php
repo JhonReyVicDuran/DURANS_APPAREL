@@ -20,41 +20,55 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     }
 
     /**
+     * Find customer accounts, optionally filtered by name or email.
+     *
+     * Admin and Staff accounts are excluded.
+     */
+    public function findCustomers(?string $search = null): array
+    {
+        $queryBuilder = $this->createQueryBuilder('u')
+            ->orderBy('u.createdAt', 'DESC');
+
+        // Search by customer name or email when a search term is provided.
+        if ($search !== null && trim($search) !== '') {
+            $searchTerm = '%' . strtolower(trim($search)) . '%';
+
+            $queryBuilder
+                ->andWhere(
+                    'LOWER(u.fullName) LIKE :search
+                    OR LOWER(u.email) LIKE :search'
+                )
+                ->setParameter('search', $searchTerm);
+        }
+
+        $users = $queryBuilder->getQuery()->getResult();
+
+        // Exclude Admin and Staff accounts.
+        return array_values(array_filter(
+            $users,
+            function (User $user): bool {
+                return !in_array('ROLE_ADMIN', $user->getRoles(), true)
+                    && !in_array('ROLE_STAFF', $user->getRoles(), true);
+            }
+        ));
+    }
+
+    /**
      * Used to upgrade (rehash) the user's password automatically over time.
      */
-    public function upgradePassword(PasswordAuthenticatedUserInterface $user, string $newHashedPassword): void
-    {
+    public function upgradePassword(
+        PasswordAuthenticatedUserInterface $user,
+        string $newHashedPassword
+    ): void {
         if (!$user instanceof User) {
-            throw new UnsupportedUserException(sprintf('Instances of "%s" are not supported.', $user::class));
+            throw new UnsupportedUserException(
+                sprintf('Instances of "%s" are not supported.', $user::class)
+            );
         }
 
         $user->setPassword($newHashedPassword);
+
         $this->getEntityManager()->persist($user);
         $this->getEntityManager()->flush();
     }
-
-//    /**
-//     * @return User[] Returns an array of User objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('u')
-//            ->andWhere('u.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('u.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
-
-//    public function findOneBySomeField($value): ?User
-//    {
-//        return $this->createQueryBuilder('u')
-//            ->andWhere('u.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
 }

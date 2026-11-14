@@ -22,12 +22,21 @@ class LoginSuccessHandler implements AuthenticationSuccessHandlerInterface
 
         $user = $token->getUser();
 
+        // ADMIN: Redirect to Admin Dashboard
         if (in_array('ROLE_ADMIN', $user->getRoles(), true)) {
             return new RedirectResponse(
                 $this->urlGenerator->generate('admin_dashboard')
             );
         }
 
+        // STAFF: Redirect to Staff Dashboard
+        if (in_array('ROLE_STAFF', $user->getRoles(), true)) {
+            return new RedirectResponse(
+                $this->urlGenerator->generate('staff_dashboard')
+            );
+        }
+
+        // CUSTOMER: Redirect to Website Homepage
         return new RedirectResponse(
             $this->urlGenerator->generate('app_home')
         );

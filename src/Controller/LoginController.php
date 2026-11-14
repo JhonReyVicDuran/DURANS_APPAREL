@@ -5,7 +5,6 @@ namespace App\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class LoginController extends AbstractController
@@ -15,19 +14,27 @@ class LoginController extends AbstractController
         AuthenticationUtils $authenticationUtils
     ): Response {
 
-        // If the user is already logged in, redirect them.
+        // Redirect users who are already logged in.
         if ($this->getUser()) {
+
+            // ADMIN
             if ($this->isGranted('ROLE_ADMIN')) {
                 return $this->redirectToRoute('admin_dashboard');
             }
 
+            // STAFF
+            if ($this->isGranted('ROLE_STAFF')) {
+                return $this->redirectToRoute('staff_dashboard');
+            }
+
+            // CUSTOMER
             return $this->redirectToRoute('app_home');
         }
 
-        // Get the last login error, if authentication failed.
+        // Get the last login error.
         $error = $authenticationUtils->getLastAuthenticationError();
 
-        // Get the email entered during the previous login attempt.
+        // Get the previously entered email.
         $lastEmail = $authenticationUtils->getLastUsername();
 
         return $this->render('home/login.html.twig', [

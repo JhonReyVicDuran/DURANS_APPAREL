@@ -1,4 +1,6 @@
 security:
+    expose_security_errors: 'account_status'
+
     password_hashers:
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
 
@@ -16,6 +18,7 @@ security:
         main:
             lazy: true
             provider: app_user_provider
+            user_checker: App\Security\UserChecker
 
             form_login:
                 login_path: login
@@ -31,6 +34,7 @@ security:
                 target: login
 
     access_control:
+        - { path: ^/admin/(products|orders|messages)(/|$), allow_if: "is_granted('ROLE_ADMIN') or is_granted('ROLE_STAFF')" }
         - { path: ^/admin, roles: ROLE_ADMIN }
 
 when@test:

@@ -1,0 +1,170 @@
+{% extends 'admin_base.html.twig' %}
+
+{% block title %}Staff Accounts - DURAN'S Apparel{% endblock %}
+
+{% block body %}
+
+<section class="content-section">
+
+    <div class="section-heading">
+        <h2>STAFF ACCOUNTS</h2>
+        <p>View and manage Staff accounts</p>
+    </div>
+
+    {% for message in app.flashes('success') %}
+        <div class="success-message">{{ message }}</div>
+    {% endfor %}
+
+    <div class="product-panel">
+
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 25px; flex-wrap: wrap;">
+            <h3 style="margin: 0;">STAFF LIST</h3>
+
+            <a href="{{ path('admin_staff_new') }}" class="add-product-btn" style="text-decoration: none;">
+                + CREATE STAFF ACCOUNT
+            </a>
+        </div>
+
+        {% if staffMembers is empty %}
+
+            <p>No Staff accounts have been created yet.</p>
+
+        {% else %}
+
+            <div class="table-responsive">
+
+                <table class="product-table">
+
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Full Name</th>
+                            <th>Email Address</th>
+                            <th>Status</th>
+                            <th>Date Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for staff in staffMembers %}
+
+                            <tr>
+                                <td>{{ staff.id }}</td>
+
+                                <td>{{ staff.fullName }}</td>
+
+                                <td>{{ staff.email }}</td>
+
+                                <td>
+                                    {% if staff.isActive %}
+                                        <span style="color: #087c38; font-weight: bold;">Active</span>
+                                    {% else %}
+                                        <span style="color: #d00000; font-weight: bold;">Inactive</span>
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {{ staff.createdAt|date('M d, Y h:i A') }}
+                                </td>
+
+                                <td class="product-actions">
+
+                                    <a
+                                        href="{{ path('admin_staff_edit', {id: staff.id}) }}"
+                                        class="product-action-btn edit-btn"
+                                    >
+                                        Edit
+                                    </a>
+
+                                    <form
+                                        method="post"
+                                        action="{{ path('admin_staff_toggle_status', {id: staff.id}) }}"
+                                        style="display: inline;"
+                                    >
+                                        <input
+                                            type="hidden"
+                                            name="_token"
+                                            value="{{ csrf_token('toggle_staff_' ~ staff.id) }}"
+                                        >
+
+                                        {% if staff.isActive %}
+                                            <button
+                                                type="button"
+                                                class="product-action-btn delete-btn"
+                                                data-staff-name="{{ staff.fullName }}"
+                                                data-action="deactivate"
+                                                onclick="openStaffStatusModal(event, this)"
+                                            >
+                                                Deactivate
+                                            </button>
+                                        {% else %}
+                                            <button
+                                                type="button"
+                                                class="product-action-btn edit-btn"
+                                                data-staff-name="{{ staff.fullName }}"
+                                                data-action="activate"
+                                                onclick="openStaffStatusModal(event, this)"
+                                            >
+                                                Activate
+                                            </button>
+                                        {% endif %}
+
+                                    </form>
+
+                                </td>
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</section>
+
+<!-- STAFF STATUS CONFIRMATION MODAL -->
+
+<div class="staff-status-overlay" id="staffStatusOverlay">
+
+    <div class="staff-status-popup">
+
+        <h2 id="staffStatusTitle">Confirm Action?</h2>
+
+        <p id="staffStatusMessage">
+            Are you sure you want to change this Staff account's status?
+        </p>
+
+        <div class="logout-buttons">
+
+            <button
+                type="button"
+                class="staff-status-confirm"
+                id="staffStatusConfirm"
+                onclick="confirmStaffStatusChange()"
+            >
+                CONFIRM
+            </button>
+
+            <button
+                type="button"
+                class="logout-cancel"
+                onclick="closeStaffStatusModal()"
+            >
+                CANCEL
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -6,6 +6,7 @@ use App\Entity\Product;
 use App\Entity\Category;
 use App\Repository\ProductRepository;
 use App\Repository\CategoryRepository;
+use App\Service\ActivityLogger;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -32,6 +33,18 @@ class ProductsController extends AbstractController
         'Compression Wear',
         'Accessories',
     ];
+
+    private function denyUnauthorizedProductAccess(): void
+    {
+        if (
+            !$this->isGranted('ROLE_ADMIN')
+            && !$this->isGranted('ROLE_STAFF')
+        ) {
+            throw $this->createAccessDeniedException(
+                'You do not have permission to access this page.'
+            );
+        }
+    }
 
     private function ensureDefaultCategories(
         CategoryRepository $categoryRepository,
@@ -129,9 +142,10 @@ class ProductsController extends AbstractController
         Request $request,
         EntityManagerInterface $entityManager,
         ProductRepository $productRepository,
-        CategoryRepository $categoryRepository
+        CategoryRepository $categoryRepository,
+        ActivityLogger $activityLogger
     ): Response {
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        $this->denyUnauthorizedProductAccess();
 
         $error = null;
 
@@ -191,6 +205,21 @@ class ProductsController extends AbstractController
                         $entityManager->persist($product);
                         $entityManager->flush();
 
+                        $activityLogger->log(
+                            'CREATE',
+                            'Products',
+                            'Added a new product: ' . $productName,
+                            $product->getId(),
+                            null,
+                            [
+                                'product_name' => $productName,
+                                'price' => $product->getPrice(),
+                                'stock' => $product->getStock(),
+                                'sizes' => $sizes,
+                                'description' => $description,
+                            ]
+                        );
+
                         $this->addFlash('success', 'Product added successfully!');
 
                         return $this->redirectToRoute('admin_products');
@@ -217,9 +246,10 @@ class ProductsController extends AbstractController
         Request $request,
         ProductRepository $productRepository,
         CategoryRepository $categoryRepository,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        ActivityLogger $activityLogger
     ): Response {
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        $this->denyUnauthorizedProductAccess();
 
         $product = $productRepository->find($id);
 
@@ -271,6 +301,14 @@ class ProductsController extends AbstractController
                     $error = $imageError;
                 } else {
                     try {
+                        $oldValues = [
+                            'product_name' => $product->getProductName(),
+                            'price' => $product->getPrice(),
+                            'stock' => $product->getStock(),
+                            'sizes' => $product->getSizes(),
+                            'description' => $product->getDescription(),
+                        ];
+
                         $oldImage = $product->getImage();
 
                         if ($image instanceof UploadedFile) {
@@ -285,6 +323,23 @@ class ProductsController extends AbstractController
                         $product->setDescription($description);
 
                         $entityManager->flush();
+
+                        $newValues = [
+                            'product_name' => $product->getProductName(),
+                            'price' => $product->getPrice(),
+                            'stock' => $product->getStock(),
+                            'sizes' => $product->getSizes(),
+                            'description' => $product->getDescription(),
+                        ];
+
+                        $activityLogger->log(
+                            'UPDATE',
+                            'Products',
+                            'Updated product: ' . $product->getProductName(),
+                            $product->getId(),
+                            $oldValues,
+                            $newValues
+                        );
 
                         if ($image instanceof UploadedFile && $oldImage !== $product->getImage()) {
                             $this->removeProductImage($oldImage);
@@ -313,9 +368,10 @@ class ProductsController extends AbstractController
         int $id,
         Request $request,
         ProductRepository $productRepository,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        ActivityLogger $activityLogger
     ): Response {
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        $this->denyUnauthorizedProductAccess();
 
         $product = $productRepository->find($id);
 
@@ -330,16 +386,31 @@ class ProductsController extends AbstractController
         }
 
         $imagePath = $product->getImage();
+        $productName = $product->getProductName();
+        $productId = $product->getId();
 
         try {
             $entityManager->remove($product);
             $entityManager->flush();
+
+            $activityLogger->log(
+                'DELETE',
+                'Products',
+                'Deleted product: ' . $productName,
+                $productId,
+                [
+                    'product_name' => $productName,
+                ],
+                null
+            );
 
             $this->removeProductImage($imagePath);
 
             $this->addFlash('success', 'Product deleted successfully!');
         } catch (\Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException $exception) {
             $this->addFlash('error', 'This product cannot be deleted because it is already included in an order.');
+        } catch (\Throwable $exception) {
+            $this->addFlash('error', 'Unable to delete the product. Please try again.');
         }
 
         return $this->redirectToRoute('admin_products');

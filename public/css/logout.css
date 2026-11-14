@@ -1,3 +1,7 @@
+/* ==========================================
+   LOGOUT CONFIRMATION MODAL
+========================================== */
+
 .logout-overlay {
     position: fixed;
     inset: 0;
@@ -62,4 +66,72 @@
 
 .logout-cancel:hover {
     background: #bbb;
+}
+
+
+/* ==========================================
+   STAFF STATUS CONFIRMATION MODAL
+========================================== */
+
+.staff-status-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+}
+
+.staff-status-overlay.active {
+    display: flex;
+}
+
+.staff-status-popup {
+    width: 380px;
+    max-width: 90%;
+    background: white;
+    color: black;
+    padding: 30px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.3);
+    animation: staffModalAppear 0.2s ease-out;
+}
+
+.staff-status-popup h2 {
+    font-size: 25px;
+    margin-bottom: 12px;
+}
+
+.staff-status-popup p {
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 25px;
+}
+
+.staff-status-confirm {
+    background: red;
+    color: white;
+    padding: 11px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.staff-status-confirm:hover {
+    background: #b90000;
+}
+
+@keyframes staffModalAppear {
+    from {
+        opacity: 0;
+        transform: scale(0.92);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }

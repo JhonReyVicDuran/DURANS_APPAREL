@@ -3,29 +3,74 @@
     {# BRAND #}
     <div class="sidebar-brand">
         <h1>DURAN'S</h1>
-        <span>APPAREL ADMIN</span>
+
+        {% if is_granted('ROLE_ADMIN') %}
+            <span>APPAREL ADMIN</span>
+        {% else %}
+            <span>APPAREL STAFF</span>
+        {% endif %}
     </div>
 
     {# MAIN NAVIGATION #}
     <nav class="sidebar-menu">
 
         {# DASHBOARD #}
-        <a href="{{ path('admin_dashboard') }}"
-           class="menu-item {% if app.request.attributes.get('_route') == 'admin_dashboard' %}active{% endif %}">
-            <span class="menu-icon">▣</span>
-            <span>Dashboard</span>
-        </a>
+        {% if is_granted('ROLE_ADMIN') %}
+
+            <a href="{{ path('admin_dashboard') }}"
+               class="menu-item {% if app.request.attributes.get('_route') == 'admin_dashboard' %}active{% endif %}">
+                <span class="menu-icon">▣</span>
+                <span>Dashboard</span>
+            </a>
+
+        {% elseif is_granted('ROLE_STAFF') %}
+
+            <a href="{{ path('staff_dashboard') }}"
+               class="menu-item {% if app.request.attributes.get('_route') == 'staff_dashboard' %}active{% endif %}">
+                <span class="menu-icon">▣</span>
+                <span>Dashboard</span>
+            </a>
+
+        {% endif %}
+
+        {# ADMIN-ONLY NAVIGATION #}
+        {% if is_granted('ROLE_ADMIN') %}
+
+            {# STAFF ACCOUNTS #}
+            <a href="{{ path('admin_staff_index') }}"
+               class="menu-item {% if app.request.attributes.get('_route') starts with 'admin_staff' %}active{% endif %}">
+                <span class="menu-icon">♟</span>
+                <span>Staff Accounts</span>
+            </a>
+
+            {# CUSTOMER ACCOUNTS #}
+            <a href="{{ path('admin_customer_index') }}"
+               class="menu-item {% if app.request.attributes.get('_route') starts with 'admin_customer' %}active{% endif %}">
+                <span class="menu-icon">♙</span>
+                <span>Customer Accounts</span>
+            </a>
+
+            {# ACTIVITY LOGS #}
+            <a href="{{ path('admin_activity_logs') }}"
+               class="menu-item {% if app.request.attributes.get('_route') == 'admin_activity_logs' %}active{% endif %}">
+                <span class="menu-icon">◷</span>
+                <span>Activity Logs</span>
+            </a>
+
+        {% endif %}
+
+        {# SHARED NAVIGATION: ADMIN AND STAFF #}
 
         {# PRODUCTS #}
         <a href="{{ path('admin_products') }}"
-           class="menu-item {% if app.request.attributes.get('_route') == 'admin_products' %}active{% endif %}">
+           class="menu-item {% if app.request.attributes.get('_route') starts with 'admin_product' %}active{% endif %}">
             <span class="menu-icon">◆</span>
             <span>Products</span>
         </a>
 
         {# ORDERS #}
         <a href="{{ path('admin_orders') }}"
-           class="menu-item {% if app.request.attributes.get('_route') in ['admin_orders', 'admin_order_update_status'] %}active{% endif %}">
+           class="menu-item {% if app.request.attributes.get('_route') starts with 'admin_order' %}active{% endif %}">
             <span class="menu-icon">▤</span>
             <span>Orders</span>
         </a>

@@ -1,0 +1,224 @@
+{% extends 'admin_base.html.twig' %}
+
+{% block title %}Customer Accounts - DURAN'S Apparel{% endblock %}
+
+{% block body %}
+
+<section class="content-section">
+
+    <div class="section-heading">
+        <h2>CUSTOMER ACCOUNTS</h2>
+        <p>View and manage registered Customer accounts</p>
+    </div>
+
+    {% for message in app.flashes('success') %}
+        <div class="success-message">{{ message }}</div>
+    {% endfor %}
+
+    {% for message in app.flashes('error') %}
+        <div class="error-message">{{ message }}</div>
+    {% endfor %}
+
+    <div class="product-panel">
+
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 25px; flex-wrap: wrap;">
+
+            <h3 style="margin: 0;">CUSTOMER LIST</h3>
+
+            <form method="get" action="{{ path('admin_customer_index') }}"
+                  style="display: flex; gap: 8px; flex-wrap: wrap;">
+
+                <input
+                    type="text"
+                    name="q"
+                    value="{{ search }}"
+                    placeholder="Search name or email..."
+                    style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;"
+                >
+
+                <button type="submit" class="product-action-btn edit-btn">
+                    SEARCH
+                </button>
+
+                {% if search %}
+                    <a href="{{ path('admin_customer_index') }}"
+                       class="product-action-btn delete-btn"
+                       style="text-decoration: none;">
+                        CLEAR
+                    </a>
+                {% endif %}
+
+            </form>
+
+        </div>
+
+        {% if customers is empty %}
+
+            <p>No Customer accounts found.</p>
+
+        {% else %}
+
+            <div class="table-responsive">
+
+                <table class="product-table">
+
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Full Name</th>
+                            <th>Email Address</th>
+                            <th>Status</th>
+                            <th>Date Registered</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for customer in customers %}
+
+                            <tr>
+
+                                <td>{{ customer.id }}</td>
+
+                                <td>{{ customer.fullName }}</td>
+
+                                <td>{{ customer.email }}</td>
+
+                                <td>
+                                    {% if customer.isActive %}
+                                        <span style="color: #087c38; font-weight: bold;">
+                                            Active
+                                        </span>
+                                    {% else %}
+                                        <span style="color: #d00000; font-weight: bold;">
+                                            Inactive
+                                        </span>
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {{ customer.createdAt|date('M d, Y h:i A', 'Asia/Manila') }}
+                                </td>
+
+                                <td class="product-actions">
+
+                                    <a
+                                        href="{{ path('admin_customer_edit', {id: customer.id}) }}"
+                                        class="product-action-btn edit-btn"
+                                    >
+                                        Edit
+                                    </a>
+
+                                    <form
+                                        method="post"
+                                        action="{{ path('admin_customer_toggle_status', {id: customer.id}) }}"
+                                        style="display: inline;"
+                                    >
+
+                                        <input
+                                            type="hidden"
+                                            name="_token"
+                                            value="{{ csrf_token('toggle_customer_' ~ customer.id) }}"
+                                        >
+
+                                        {% if customer.isActive %}
+                                            <button
+                                                type="button"
+                                                class="product-action-btn delete-btn"
+                                                data-customer-name="{{ customer.fullName|e('html_attr') }}"
+                                                data-action="deactivate"
+                                                onclick="openCustomerStatusModal(event, this)"
+                                            >
+                                                Deactivate
+                                            </button>
+                                        {% else %}
+                                            <button
+                                                type="button"
+                                                class="product-action-btn edit-btn"
+                                                data-customer-name="{{ customer.fullName|e('html_attr') }}"
+                                                data-action="activate"
+                                                onclick="openCustomerStatusModal(event, this)"
+                                            >
+                                                Activate
+                                            </button>
+                                        {% endif %}
+
+                                    </form>
+
+                                    <form
+                                        method="post"
+                                        action="{{ path('admin_customer_delete', {id: customer.id}) }}"
+                                        style="display: inline;"
+                                        onsubmit="return confirm('Are you sure you want to permanently delete this customer account? This action cannot be undone.');"
+                                    >
+
+                                        <input
+                                            type="hidden"
+                                            name="_token"
+                                            value="{{ csrf_token('delete_customer_' ~ customer.id) }}"
+                                        >
+
+                                        <button type="submit" class="product-action-btn delete-btn">
+                                            Delete
+                                        </button>
+
+                                    </form>
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</section>
+
+
+<!-- CUSTOMER STATUS CONFIRMATION MODAL -->
+
+<div class="staff-status-overlay" id="customerStatusOverlay">
+
+    <div class="staff-status-popup">
+
+        <h2 id="customerStatusTitle">Confirm Action?</h2>
+
+        <p id="customerStatusMessage">
+            Are you sure you want to change this Customer account's status?
+        </p>
+
+        <div class="logout-buttons">
+
+            <button
+                type="button"
+                class="staff-status-confirm"
+                id="customerStatusConfirm"
+                onclick="confirmCustomerStatusChange()"
+            >
+                CONFIRM
+            </button>
+
+            <button
+                type="button"
+                class="logout-cancel"
+                onclick="closeCustomerStatusModal()"
+            >
+                CANCEL
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

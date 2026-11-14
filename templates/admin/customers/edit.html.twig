@@ -1,0 +1,95 @@
+{% extends 'admin_base.html.twig' %}
+
+{% block title %}Edit Customer - DURAN'S Apparel{% endblock %}
+
+{% block body %}
+
+<section class="content-section">
+
+    <div class="section-heading">
+        <h2>EDIT CUSTOMER ACCOUNT</h2>
+        <p>Update the customer's account information and password</p>
+    </div>
+
+    <div class="product-panel">
+
+        <h3>CUSTOMER INFORMATION</h3>
+
+        {{ form_start(form) }}
+
+            <div class="form-group">
+                {{ form_label(form.fullName) }}
+                {{ form_widget(form.fullName, {
+                    attr: {
+                        class: 'form-control',
+                        placeholder: 'Enter customer full name'
+                    }
+                }) }}
+                {{ form_errors(form.fullName) }}
+            </div>
+
+            <div class="form-group">
+                {{ form_label(form.email) }}
+                {{ form_widget(form.email, {
+                    attr: {
+                        class: 'form-control',
+                        placeholder: 'Enter customer email address'
+                    }
+                }) }}
+                {{ form_errors(form.email) }}
+            </div>
+
+            <hr style="margin: 25px 0;">
+
+            <h3>CHANGE CUSTOMER PASSWORD</h3>
+
+            <p style="color: #777; margin-bottom: 20px;">
+                Leave both password fields empty if you do not want to
+                change the customer's current password.
+            </p>
+
+            <div class="form-group">
+                {{ form_label(form.plainPassword.first) }}
+                {{ form_widget(form.plainPassword.first, {
+                    attr: {
+                        class: 'form-control'
+                    }
+                }) }}
+                {{ form_errors(form.plainPassword.first) }}
+            </div>
+
+            <div class="form-group">
+                {{ form_label(form.plainPassword.second) }}
+                {{ form_widget(form.plainPassword.second, {
+                    attr: {
+                        class: 'form-control'
+                    }
+                }) }}
+                {{ form_errors(form.plainPassword.second) }}
+            </div>
+
+            {{ form_errors(form.plainPassword) }}
+
+            <div style="display: flex; gap: 10px; margin-top: 25px; flex-wrap: wrap;">
+
+                <button type="submit" class="add-product-btn">
+                    SAVE CHANGES
+                </button>
+
+                <a
+                    href="{{ path('admin_customer_index') }}"
+                    class="product-action-btn delete-btn"
+                    style="text-decoration: none; padding: 12px 20px;"
+                >
+                    CANCEL
+                </a>
+
+            </div>
+
+        {{ form_end(form) }}
+
+    </div>
+
+</section>
+
+{% endblock %}
